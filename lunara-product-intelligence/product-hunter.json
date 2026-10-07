@@ -1,0 +1,427 @@
+{
+  "name": "Lunara - 01 Product Hunter",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "7097325c-9d15-4768-9ff7-e32de15b5a91",
+      "name": "01 - Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "brand_name",
+              "type": "string",
+              "value": "Lunara"
+            },
+            {
+              "id": "2",
+              "name": "country",
+              "type": "string",
+              "value": "Saudi Arabia"
+            },
+            {
+              "id": "3",
+              "name": "country_code",
+              "type": "string",
+              "value": "SA"
+            },
+            {
+              "id": "4",
+              "name": "currency",
+              "type": "string",
+              "value": "SAR"
+            },
+            {
+              "id": "5",
+              "name": "niche",
+              "type": "string",
+              "value": "Beauty & Personal Care"
+            },
+            {
+              "id": "6",
+              "name": "top_n",
+              "type": "number",
+              "value": 3
+            },
+            {
+              "id": "7",
+              "name": "ai_model",
+              "type": "string",
+              "value": "openai/gpt-4.1-mini"
+            },
+            {
+              "id": "8",
+              "name": "workflow_version",
+              "type": "string",
+              "value": "1.0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4bc5c8be-f607-4204-b850-e21de5c1999b",
+      "name": "00 - Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"products\": [\n    {\n      \"product_name\": \"Rose Quartz Facial Roller & Gua Sha Set\",\n      \"brand\": \"Lunara Demo\",\n      \"category\": \"Beauty & Personal Care - Skincare Tools\",\n      \"supplier_price\": 18,\n      \"selling_price\": 59,\n      \"currency\": \"SAR\",\n      \"product_url\": \"https://example.com/demo/rose-quartz-roller\",\n      \"image_url\": \"https://example.com/demo/images/rose-quartz-roller.jpg\",\n      \"description\": \"Dual-ended rose quartz facial roller and gua sha stone for at-home facial massage, lymphatic drainage, and skincare routines.\",\n      \"available_stock\": 500,\n      \"source\": \"DEMO\"\n    },\n    {\n      \"product_name\": \"Vitamin C Brightening Serum 30ml\",\n      \"brand\": \"Lunara Demo\",\n      \"category\": \"Beauty & Personal Care - Skincare\",\n      \"supplier_price\": 22,\n      \"selling_price\": 79,\n      \"currency\": \"SAR\",\n      \"product_url\": \"https://example.com/demo/vitamin-c-serum\",\n      \"image_url\": \"https://example.com/demo/images/vitamin-c-serum.jpg\",\n      \"description\": \"Brightening vitamin C serum formulated to reduce dark spots and even skin tone, suitable for daily use.\",\n      \"available_stock\": 350,\n      \"source\": \"DEMO\"\n    },\n    {\n      \"product_name\": \"Silk Wrapped Hair Turban Towel\",\n      \"brand\": \"Lunara Demo\",\n      \"category\": \"Beauty & Personal Care - Hair Care\",\n      \"supplier_price\": 15,\n      \"selling_price\": 45,\n      \"currency\": \"SAR\",\n      \"product_url\": \"https://example.com/demo/silk-hair-turban\",\n      \"image_url\": \"https://example.com/demo/images/silk-hair-turban.jpg\",\n      \"description\": \"Quick-dry silk-wrapped hair turban towel designed to reduce frizz and protect hair after washing.\",\n      \"available_stock\": 620,\n      \"source\": \"DEMO\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "c27191b2-9de1-453c-bcc3-674bb6321f17",
+      "name": "02 - Candidate Products",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "products",
+        "options": {
+          "destinationFieldName": "product"
+        }
+      },
+      "id": "4fc94d63-e53f-4106-9fcb-fab88a398a82",
+      "name": "03 - Split Products",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        608,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const p = $json.product;\nconst sellingPrice = Number(p.selling_price) || 0;\nconst supplierPrice = Number(p.supplier_price) || 0;\nconst grossProfit = sellingPrice - supplierPrice;\nconst marginPercent = sellingPrice > 0 ? (grossProfit / sellingPrice) * 100 : 0;\n\nreturn {\n  json: Object.assign({}, p, {\n    gross_profit: Number(grossProfit.toFixed(2)),\n    margin_percent: Number(marginPercent.toFixed(2)),\n    demand_score: 5,\n    competition_score: 5,\n    creative_potential_score: 5,\n    impulse_purchase_score: 5,\n    problem_solution_score: 5,\n    trust_risk_score: 5,\n    score_source: \"demo\"\n  })\n};"
+      },
+      "id": "06d5e264-868f-451c-9b58-b230bfdd8732",
+      "name": "04 - Calculate Basic Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const p = $json;\nconst config = $('00 - Config').first().json;\n\nconst promptTemplate = \"You are a senior e-commerce product research analyst.\\n\\n\" +\n\"Evaluate the following product SPECIFICALLY for this market context:\\n\" +\n\"Country: \" + config.country + \"\\n\" +\n\"Niche: \" + config.niche + \"\\n\" +\n\"Primary marketing platforms: TikTok, Snapchat, Instagram\\n\\n\" +\n\"Product details (this is the ONLY source of truth about the product):\\n\" +\n\"- Name: \" + p.product_name + \"\\n\" +\n\"- Brand: \" + p.brand + \"\\n\" +\n\"- Category: \" + p.category + \"\\n\" +\n\"- Description: \" + p.description + \"\\n\" +\n\"- Selling Price: \" + p.selling_price + \" \" + p.currency + \"\\n\" +\n\"- Supplier Price: \" + p.supplier_price + \" \" + p.currency + \"\\n\" +\n\"- Gross Profit: \" + p.gross_profit + \" \" + p.currency + \"\\n\" +\n\"- Margin: \" + p.margin_percent + \"%\\n\\n\" +\n\"Important: This is DEMO/placeholder product data (source = \" + p.source + \"). Do not claim you performed live market research. Base your analysis only on the information given plus general domain knowledge.\\n\\n\" +\n\"STRICT EVIDENCE RULES — you must follow all of these:\\n\" +\n\"1. Never invent social proof.\\n\" +\n\"2. Never invent customer numbers, reviews, ratings, popularity, sales volume, or testimonials.\\n\" +\n\"3. Never say \\\"best seller\\\", \\\"viral\\\", \\\"loved by thousands\\\", \\\"popular in Saudi Arabia\\\", or similar phrases unless verified source data explicitly supports it.\\n\" +\n\"4. Never claim a product is specifically formulated for Saudi Arabia or the Saudi climate unless this exists in the source data above.\\n\" +\n\"5. Never invent medical, dermatological, therapeutic, or physiological benefits.\\n\" +\n\"6. Product benefits must come only from the supplied product description/data above — do not add benefits that are not stated or directly implied there.\\n\" +\n\"7. If evidence for a strong claim is missing, use neutral marketing language instead of fabricating evidence (e.g. describe the product itself rather than asserting unverified outcomes or popularity).\\n\" +\n\"8. Do not mention the brand \\\"Lunara\\\" as the manufacturer of this product unless the product data explicitly states Lunara is the brand. Lunara is the STORE/E-COMMERCE BRAND selling the product, not necessarily its manufacturer.\\n\" +\n\"9. Hooks must be compelling but evidence-safe — no fabricated stats, claims, or social proof.\\n\" +\n\"10. Do not claim live Saudi market research has occurred unless live research evidence is supplied to you. For this DEMO product data, no live research has been performed.\\n\" +\n\"11. Clearly separate in your reasoning: (a) product facts taken directly from the data above, (b) your own AI marketing interpretation/angle, and (c) verified market evidence (if any was supplied — for DEMO data there is none).\\n\" +\n\"12. Set \\\"evidence_level\\\" based on what was actually supplied: use \\\"DEMO\\\" when the product data is demo/placeholder data (source = DEMO), \\\"PRODUCT_DATA\\\" when only real product data (no live market research) was supplied, or \\\"LIVE_RESEARCH\\\" only if real live market research evidence was explicitly supplied to you. For this product, source = \" + p.source + \", so evidence_level must be \\\"DEMO\\\".\\n\" +\n\"13. Set \\\"claim_risk\\\" to LOW, MEDIUM, or HIGH based on how much of your response relies on interpretation versus stated facts (LOW = closely tied to given facts, HIGH = more speculative framing, even if evidence-safe).\\n\" +\n\"14. Set \\\"unsupported_claims_detected\\\" to a list of any specific unsupported claim types you considered making but avoided (e.g. \\\"social_proof\\\", \\\"saudi_climate_formulation\\\", \\\"medical_benefit\\\"), or an empty array if none were relevant.\\n\\n\" +\n\"Respond with STRICT JSON only, no markdown fences, matching exactly this schema:\\n\" +\n\"{\\n\" +\n\"  \\\"target_customer\\\": \\\"\\\",\\n\" +\n\"  \\\"main_problem\\\": \\\"\\\",\\n\" +\n\"  \\\"selling_angle\\\": \\\"\\\",\\n\" +\n\"  \\\"saudi_market_fit_score\\\": 0,\\n\" +\n\"  \\\"creative_potential_score\\\": 0,\\n\" +\n\"  \\\"impulse_purchase_score\\\": 0,\\n\" +\n\"  \\\"competition_risk_score\\\": 0,\\n\" +\n\"  \\\"trust_risk_score\\\": 0,\\n\" +\n\"  \\\"recommended_platform\\\": \\\"\\\",\\n\" +\n\"  \\\"reason\\\": \\\"\\\",\\n\" +\n\"  \\\"hooks\\\": [],\\n\" +\n\"  \\\"claim_risk\\\": \\\"LOW|MEDIUM|HIGH\\\",\\n\" +\n\"  \\\"unsupported_claims_detected\\\": [],\\n\" +\n\"  \\\"evidence_level\\\": \\\"DEMO|PRODUCT_DATA|LIVE_RESEARCH\\\"\\n\" +\n\"}\\n\\n\" +\n\"All numeric scores must be integers from 0 to 10. For this DEMO product, evidence_level in your JSON response must be exactly \\\"DEMO\\\".\";\n\nreturn {\n  json: Object.assign({}, p, { ai_prompt: promptTemplate })\n};"
+      },
+      "id": "fb3ca183-2b10-4dd9-9a72-5c8f40f06fe7",
+      "name": "05 - Prepare Saudi Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $('00 - Config').first().json.ai_model, messages: [ { role: \"user\", content: $json.ai_prompt } ], temperature: 0.2 } }}",
+        "options": {}
+      },
+      "id": "219eb3d7-3901-413a-b708-5947a237afea",
+      "name": "06 - OpenRouter Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1504,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const original = $('05 - Prepare Saudi Analysis').item.json;\nconst httpResponse = $json;\n\nlet aiText = '';\ntry {\n  aiText = (httpResponse.choices && httpResponse.choices[0] && httpResponse.choices[0].message && httpResponse.choices[0].message.content) || '';\n} catch (e) {\n  aiText = '';\n}\n\nlet cleaned = (aiText || '').trim();\nif (cleaned.indexOf('```') === 0) {\n  cleaned = cleaned.replace(/^```(json)?/i, '').replace(/```$/, '').trim();\n}\n\nlet parsed = null;\nlet ai_parse_error = false;\n\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  ai_parse_error = true;\n  parsed = {\n    target_customer: \"\",\n    main_problem: \"\",\n    selling_angle: \"\",\n    saudi_market_fit_score: 0,\n    creative_potential_score: 0,\n    impulse_purchase_score: 0,\n    competition_risk_score: 0,\n    trust_risk_score: 0,\n    recommended_platform: \"\",\n    reason: \"AI response could not be parsed\",\n    hooks: []\n  };\n}\n\nreturn {\n  json: Object.assign({}, original, parsed, { ai_parse_error: ai_parse_error })\n};"
+      },
+      "id": "23fb01e3-828d-43a4-a6b2-9e6f7d735a49",
+      "name": "07 - Parse AI Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $json;\n\nfunction clamp(n, min, max) {\n  const num = Number(n) || 0;\n  return Math.min(max, Math.max(min, num));\n}\n\nconst saudiFit = clamp(item.saudi_market_fit_score, 0, 10);\nconst creative = clamp(item.creative_potential_score, 0, 10);\nconst impulse = clamp(item.impulse_purchase_score, 0, 10);\nconst problemSolution = clamp(item.problem_solution_score, 0, 10);\nconst competitionRisk = clamp(item.competition_risk_score !== undefined ? item.competition_risk_score : item.competition_score, 0, 10);\nconst trustRisk = clamp(item.trust_risk_score, 0, 10);\n\nconst marginPercent = Number(item.margin_percent) || 0;\nconst normalizedMarginScore = clamp(marginPercent / 8, 0, 10);\n\nconst weights = {\n  saudiFit: 0.25,\n  margin: 0.20,\n  creative: 0.20,\n  impulse: 0.15,\n  problemSolution: 0.10,\n  competition: 0.05,\n  trust: 0.05\n};\n\nconst positiveContribution =\n  (weights.saudiFit * saudiFit) +\n  (weights.margin * normalizedMarginScore) +\n  (weights.creative * creative) +\n  (weights.impulse * impulse) +\n  (weights.problemSolution * problemSolution);\n\nconst negativeContribution =\n  (weights.competition * (10 - competitionRisk)) +\n  (weights.trust * (10 - trustRisk));\n\nconst rawScore = (positiveContribution + negativeContribution) * 10;\nconst finalScore = clamp(rawScore, 0, 100);\n\nlet recommendation = 'REJECT';\nif (finalScore >= 85) {\n  recommendation = 'STRONG TEST';\n} else if (finalScore >= 70) {\n  recommendation = 'TEST';\n} else if (finalScore >= 55) {\n  recommendation = 'WATCH';\n}\n\nreturn {\n  json: Object.assign({}, item, {\n    final_score: Number(finalScore.toFixed(2)),\n    score_breakdown: {\n      saudi_market_fit: saudiFit,\n      margin_normalized: Number(normalizedMarginScore.toFixed(2)),\n      creative_potential: creative,\n      impulse_purchase: impulse,\n      problem_solution: problemSolution,\n      competition_risk: competitionRisk,\n      trust_risk: trustRisk,\n      weights: weights\n    },\n    recommendation: recommendation\n  })\n};"
+      },
+      "id": "e9fa3b82-bc62-46f6-b30a-b10cf192fc34",
+      "name": "08 - Product Scoring",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "final_score",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "767e0177-74d1-42b6-8ece-a3834d81d9e5",
+      "name": "09 - Rank Products",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('00 - Config').first().json;\nconst topN = Number(config.top_n) || 3;\n\nconst allItems = $input.all().map(function(i) { return i.json; });\n\nconst top = allItems.slice(0, topN).map(function(item, index) {\n  return {\n    rank: index + 1,\n    product_name: item.product_name,\n    category: item.category,\n    selling_price: item.selling_price,\n    gross_profit: item.gross_profit,\n    margin_percent: item.margin_percent,\n    final_score: item.final_score,\n    recommendation: item.recommendation,\n    recommended_platform: item.recommended_platform,\n    selling_angle: item.selling_angle,\n    main_problem: item.main_problem,\n    hooks: item.hooks,\n    product_url: item.product_url\n  };\n});\n\nreturn top.map(function(item) { return { json: item }; });"
+      },
+      "id": "fe36abff-59f5-41e1-8524-9c976bc8d684",
+      "name": "10 - Top 3 Opportunities",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📥 INPUT\nManual trigger, global config, and demo candidate products (Beauty & Personal Care, Saudi Arabia). Products are split into individual items for processing.",
+        "height": 300,
+        "width": 1240,
+        "color": 4
+      },
+      "id": "8d7d8716-b3cf-45da-a290-9bb6fc3e3f1f",
+      "name": "INPUT",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📊 METRICS\nCalculates gross profit and margin, and sets default 0-10 scores (marked score_source = demo) until real evidence is available.",
+        "height": 300,
+        "width": 340,
+        "color": 5
+      },
+      "id": "376a47f5-60ed-4daf-8003-8382c12ae84e",
+      "name": "METRICS",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 AI ANALYSIS\nBuilds a structured prompt, calls OpenRouter (model configurable in 00 - Config), and safely parses the JSON response — including markdown-fence stripping and parse-error fallback.",
+        "height": 300,
+        "width": 940,
+        "color": 6
+      },
+      "id": "a7f11b27-a86e-49f8-8cbb-2642683a01e9",
+      "name": "AI ANALYSIS",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🧮 SCORING\nComputes a weighted 0-100 final_score (Saudi fit 25%, margin 20%, creative 20%, impulse 15%, problem/solution 10%, competition risk 5%, trust risk 5%) and sorts products best-to-worst.",
+        "height": 300,
+        "width": 640,
+        "color": 3
+      },
+      "id": "379477ab-3ec5-497f-af3b-6d1455293c0c",
+      "name": "SCORING",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🏆 OUTPUT\nReturns the Top N (default 3) ranked opportunities with recommendation labels, selling angles, and hooks.",
+        "height": 300,
+        "width": 340,
+        "color": 7
+      },
+      "id": "260a5110-a54c-4e87-b065-3817a1764334",
+      "name": "OUTPUT",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        -64
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "01 - Manual Test Trigger": {
+      "main": [
+        [
+          {
+            "node": "00 - Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 - Config": {
+      "main": [
+        [
+          {
+            "node": "02 - Candidate Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Candidate Products": {
+      "main": [
+        [
+          {
+            "node": "03 - Split Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Split Products": {
+      "main": [
+        [
+          {
+            "node": "04 - Calculate Basic Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Calculate Basic Metrics": {
+      "main": [
+        [
+          {
+            "node": "05 - Prepare Saudi Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 - Prepare Saudi Analysis": {
+      "main": [
+        [
+          {
+            "node": "06 - OpenRouter Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 - OpenRouter Analysis": {
+      "main": [
+        [
+          {
+            "node": "07 - Parse AI Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 - Parse AI Result": {
+      "main": [
+        [
+          {
+            "node": "08 - Product Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "08 - Product Scoring": {
+      "main": [
+        [
+          {
+            "node": "09 - Rank Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "09 - Rank Products": {
+      "main": [
+        [
+          {
+            "node": "10 - Top 3 Opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
