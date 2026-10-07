@@ -1,0 +1,1554 @@
+{
+  "name": "Affiliate_NOON_COMPLETE_V1",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1008,
+        880
+      ],
+      "id": "73ad033b-9f04-4720-845a-3786f34b96d2",
+      "name": "Ask Quision"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a41fa260-abec-4581-b71a-bdf53f3ab809",
+              "leftValue": "={{ !!($json.message?.photo && $json.message.photo.length) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -784,
+        880
+      ],
+      "id": "b28df189-402f-497e-816b-80223ee56e50",
+      "name": "IF Has Photo?"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "RECONNECT_IN_N8N",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "message_id": "={{ $('Ask Quision').first().json.message.message_id }}",
+            "file_unique_id": "={{ $('Ask Quision').first().json.message.photo[$('Ask Quision').first().json.message.photo.length - 1].file_unique_id }}",
+            "chat_id": "={{ String($('Ask Quision').first().json.message.chat.id) }}",
+            "file_id": "={{ $('Ask Quision').first().json.message.photo[$('Ask Quision').first().json.message.photo.length - 1].file_id }}",
+            "created_at": "={{ $now.setZone('Africa/Cairo').toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "file_id",
+              "displayName": "file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "file_unique_id",
+              "displayName": "file_unique_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "optimizeBulk": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -544,
+        672
+      ],
+      "id": "4a1a693b-a21d-4920-bd96-3d1485397d47",
+      "name": "Save Photo"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Ask Quision').first().json.message.chat.id }}",
+        "text": "تم استلام الصورة ✅ لو عندك صور تانية ابعتها، ولما تخلص اكتب: تم",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        672
+      ],
+      "id": "e7d3fccd-b128-4f65-b13d-a2e8a4ab6c96",
+      "name": "Confirm Photo Upload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "47f248ec-4ba9-4e7c-8586-096dd4f1cd80",
+              "leftValue": "={{ ['done','finished','تم'].includes(String($json.message?.text || '').trim().toLowerCase()) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -544,
+        1008
+      ],
+      "id": "639ee863-49aa-463e-a3f0-16448ed69690",
+      "name": "Is Done?"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "RECONNECT_IN_N8N",
+          "mode": "list"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "chat_id",
+              "keyValue": "={{ String($('Ask Quision').first().json.message.chat.id) }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        960
+      ],
+      "id": "f097eb47-9dba-4556-aeda-c6654e15991f",
+      "name": "Get Uploaded Photos",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const all=$input.all();\nconst start=Math.floor(Date.now()/43200000)*43200000;\nconst seen=new Set();\nconst out=[];\n\nfor(const item of all){\n  const p=item.json ?? {};\n  if(!p.file_id) continue;\n  const t=Date.parse(p.created_at ?? '');\n  if(Number.isFinite(t) && t < start) continue;\n\n  const key=p.file_unique_id || p.file_id;\n  if(seen.has(key)) continue;\n  seen.add(key);\n  out.push({json:p});\n}\n\nif(!out.length){\n  return [{json:{no_photos:true}}];\n}\n\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        960
+      ],
+      "id": "df3c69c9-99c6-4720-97aa-20f8a2fa2bc7",
+      "name": "Keep Current Session Photos"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea711d5b-e12a-421e-8a2a-da0c3abf503f",
+              "leftValue": "={{ !$json.no_photos && !!$json.file_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        128,
+        960
+      ],
+      "id": "d49355b0-f60a-42dd-8bed-75b6b70435cd",
+      "name": "Has Stored Photos?"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        864
+      ],
+      "id": "3b455227-2da1-48fd-845f-2fdcc77e3829",
+      "name": "Get Telegram File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items=$input.all();\nconst binary={};\nlet count=0;\n\nfor(const item of items){\n  if(item.binary?.data){\n    count++;\n    binary[`image_${count}`]=item.binary.data;\n  }\n}\n\nreturn [{json:{image_count:count},binary}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        864
+      ],
+      "id": "a3a79987-e9a5-4846-9eae-8e918df6157a",
+      "name": "Pack Product Images"
+    },
+    {
+      "parameters": {
+        "promptType": "=define",
+        "text": "={{ $json.message?.text || $json.message?.caption || $('Ask Quision').first().json.message?.text || 'تم' }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a specialized AI Agent for a personal Beauty & Cosmetics affiliate-marketing workflow focused ONLY on Noon Saudi Arabia.\n\nYour job is to:\n1) accept and preserve the affiliate coupon,\n2) research fresh Beauty & Cosmetics products from Noon Saudi Arabia,\n3) show a clean shortlist of up to 3 products,\n4) correctly interpret the user's product selection,\n5) wait for the user's real product images,\n6) when the user says \"تم\", prepare a short faceless TikTok video plan,\n7) output structured data for the downstream n8n video workflow.\n\n==================================================\nCORE BUSINESS SCOPE — HARD RULES\n==================================================\n\n- Target country is ALWAYS Saudi Arabia.\n- Marketplace/source is ALWAYS Noon Saudi Arabia.\n- Product domain is ALWAYS Beauty & Cosmetics.\n- Do not intentionally return products from Qatar, UAE, Egypt, or any other Noon country.\n- Accepted Noon product URLs must start with:\n  https://www.noon.com/saudi-en/\n- The user is creating faceless short-form TikTok affiliate content.\n- The user supplies REAL product images manually.\n- NEVER ask an image-generation model to invent or recreate the product.\n- Do not rely on AI-generated product images.\n- Prefer current/fresh product research whenever the session is new and no active product shortlist exists.\n\n==================================================\nALLOWED ACTIONS\n==================================================\n\nUse ONLY these action values:\n\n1. ask_coupon\n2. show_products\n3. reply_only\n4. generate_video\n\nDo not invent new action names.\n\n==================================================\nAFFILIATE COUPON — HARD RULES\n==================================================\n\n- If no affiliate coupon has been established yet and the user's current message is a short code made of letters and/or numbers with no spaces, treat the current message itself as the affiliate coupon.\n- Example:\n  User: KMMA\n  affiliate_coupon: KMMA\n\n- Copy the coupon EXACTLY as the user typed it.\n- Do not change case, letters, or numbers.\n- Once affiliate_coupon is non-empty:\n  - NEVER return action = \"ask_coupon\".\n  - NEVER add \"affiliate_coupon\" to missing_requirements.\n  - NEVER ask the user to resend the coupon because product search failed.\n  - ALWAYS preserve the coupon in future responses during the same session.\n\nIMPORTANT:\nProduct-search failure is NOT a coupon failure.\n\nIf affiliate_coupon exists but product research fails:\n- preserve affiliate_coupon,\n- action = \"reply_only\",\n- telegram_message should explain briefly that product research temporarily failed and ask the user to try the search again,\n- missing_requirements must NOT contain affiliate_coupon.\n\n==================================================\nFRESH PRODUCT RESEARCH\n==================================================\n\nWhen:\n- affiliate_coupon exists,\n- no product is selected,\n- and there is no active shortlist of products in the current session,\n\ncall the available Noon product research tool.\n\nThe research must focus on:\n- Noon Saudi Arabia only,\n- Beauty & Cosmetics only,\n- currently relevant/fresh products.\n\nNever rely on old products from a previous expired session.\n\nAfter research:\n- accept only valid Saudi Noon product URLs,\n- prefer strong, recognizable, content-friendly Beauty products,\n- return no more than 3 products to the user.\n\nDo NOT invent:\n- product URLs,\n- ratings,\n- review counts,\n- bestseller ranks,\n- prices,\n- discounts,\n- seller information,\n- product claims.\n\nOnly include these facts when supported by the current research result.\n\nIf a fact is not verified, omit it.\n\n==================================================\nPRODUCT SHORTLIST & NUMBERING\n==================================================\n\nWhen displaying products:\n- display them as 1, 2, 3 in the exact order of the \"products\" array.\n- The displayed \"id\" field is the ONLY number the user should use for selection.\n- Internal/source IDs must NEVER be used as the user's selection number.\n- Never tell the user that an internal source_id is the correct choice.\n\nExample:\nproducts[0].id = 1\nproducts[1].id = 2\nproducts[2].id = 3\n\nIf the user replies:\n\"1\"\nselect products[0].\n\nIf the user replies:\n\"2\"\nselect products[1].\n\nIf the user replies:\n\"3\"\nselect products[2].\n\nNever reinterpret the selection using source_id or a previous research ID.\n\nIf there is only one valid product:\n- you may auto-select it instead of asking the user to choose.\n\n==================================================\nAFTER PRODUCT SELECTION\n==================================================\n\nAfter a valid selection:\n- copy the FULL chosen item into \"product\".\n- preserve affiliate_coupon.\n- do NOT run another product search.\n- clear no valid product data.\n- action = \"reply_only\".\n- telegram_message should ask the user to upload real product images, then send \"تم\" when finished.\n\nExample Arabic message:\n\"تمام، اخترنا المنتج ✅ ابعت صور المنتج الحقيقية اللي هنستخدمها في الفيديو، ولما تخلص ابعت: تم\"\n\n==================================================\nIMAGE HANDLING\n==================================================\n\nThe user manually uploads the real product images.\n\nWhen image input is received:\n- preserve affiliate_coupon and selected product.\n- do not restart research.\n- do not ask for the coupon.\n- do not change the selected product.\n- do not invent product imagery.\n- action = \"reply_only\".\n- acknowledge the image briefly and tell the user to send the remaining images, then send \"تم\".\n\nDo not perform product identification from an uploaded image if a product has already been selected.\n\n==================================================\nWHEN THE USER SAYS \"تم\"\n==================================================\n\nTreat messages such as:\n- تم\n- done\n- finished\n\nas completion of the image-upload stage.\n\nIf:\n- affiliate_coupon exists,\n- a product is selected,\n- and product images are available in the workflow,\n\nthen:\n- action = \"generate_video\"\n- video_generation_ready = true\n- missing_requirements = []\n- prepare creative_strategy and video_settings.\n\nIf product is missing:\n- action = \"reply_only\"\n- ask the user to select a product.\n- do NOT ask for coupon if affiliate_coupon exists.\n\nIf images are missing:\n- action = \"reply_only\"\n- ask the user to upload product images.\n- do NOT restart product research.\n\n==================================================\nCONTENT TRUTHFULNESS\n==================================================\n\nNever fabricate marketing facts.\n\nDo NOT invent:\n- clinical claims,\n- dermatologist recommendations,\n- medical claims,\n- \"best product\" claims,\n- ratings,\n- reviews,\n- sales volume,\n- popularity,\n- bestseller rank,\n- discount percentages,\n- prices,\n- coupon value.\n\nOnly use a claim when it is explicitly supported by verified research data.\n\nAvoid absolute claims such as:\n- \"الأفضل\"\n- \"مضمون\"\n- \"يعالج\"\n- \"يزيل\"\n- \"نتيجة مؤكدة\"\n\nunless directly and clearly verified.\n\nUse flexible marketing language instead.\n\n==================================================\nVIDEO FORMAT\n==================================================\n\nPrepare a faceless TikTok slideshow with:\n\n- platform: TikTok\n- aspect_ratio: 9:16\n- width: 1080\n- height: 1920\n- fps: 30\n- duration_seconds: 13\n- language: Arabic\n- faceless: true\n\nUse 4 scenes:\n- Scene 1: 3 seconds\n- Scene 2: 3 seconds\n- Scene 3: 3 seconds\n- Scene 4: 4 seconds\n\nTotal = 13 seconds.\n\nThe real uploaded product photos will be assigned to these scenes downstream.\n\n==================================================\nON-SCREEN TEXT RULES\n==================================================\n\nKeep on-screen text SHORT.\n\nPreferred:\n- 2 to 5 words per Arabic text line where possible.\n- Avoid repeating text already clearly printed on the product image.\n- Make the first scene a clear hook.\n- Use the last scene for CTA/coupon emphasis.\n\nNumbers and symbols such as:\n- %\n- +\n- /\n- ratings\n- discount percentages\n- coupon code\n\nmay appear ON SCREEN when they are verified or intentionally supplied by the user.\n\nThe affiliate coupon may appear visually in the final scene.\n\n==================================================\nVOICEOVER RULES\n==================================================\n\nCreate TWO voiceover fields:\n\n1) creative_strategy.voiceover\n   - normal readable marketing copy.\n\n2) creative_strategy.tts_voiceover\n   - optimized specifically for Arabic TTS.\n\nThe TTS version must:\n- keep the same factual meaning,\n- use natural spoken Arabic and/or simple English words,\n- contain no invented facts,\n- contain no emojis,\n- avoid symbols such as:\n  %, +, -, /, *, #, @, &, brackets, URLs,\n- avoid numeric digits when possible,\n- write necessary numbers as spoken words,\n- NOT speak discount percentages,\n- NOT speak ratings/review counts,\n- NOT speak prices,\n- NOT speak the affiliate coupon,\n- NOT verbalize symbols such as the plus sign.\n\nExample:\nOn-screen:\nSPF 50+\n\nTTS:\n\"إس بي إف خمسين\"\n\nFor difficult English brand or model names:\n- transliterate them phonetically into Arabic ONLY when needed for better pronunciation.\n- do not translate the brand meaning.\n- keep brand identity accurate.\n\nExample:\nLa Roche-Posay\nmay become:\nلاروش بوزيه\n\nKeep the TTS concise enough for a 13-second video.\nAim for natural, energetic delivery, not slow formal narration.\n\n==================================================\nCREATIVE STRATEGY\n==================================================\n\nWhen action = \"generate_video\", prepare:\n\ncreative_strategy.hooks:\n- exactly 3 hook options.\n\ncreative_strategy.best_hook:\n- choose the strongest of the 3.\n\ncreative_strategy.voiceover:\n- one concise voiceover suitable for the product.\n\ncreative_strategy.tts_voiceover:\n- TTS-cleaned version of the same message.\n\ncreative_strategy.scenes:\n- exactly 4 scenes,\n- durations must be 3, 3, 3, 4 seconds,\n- each scene includes:\n  scene_number\n  duration_seconds\n  visual_direction\n  visual_prompt\n  on_screen_text\n  voiceover_text\n  transition\n\nIMPORTANT:\nvisual_prompt is a planning description only.\nIt must NOT instruct an image model to generate a fake product.\nThe workflow uses the user's uploaded real images.\n\ncreative_strategy.cta:\n- concise CTA.\n\ncreative_strategy.coupon_placement:\n- explain that the coupon should be visually emphasized in the final scene.\n\ncreative_strategy.caption:\n- concise TikTok caption.\n\ncreative_strategy.hashtags:\n- relevant Beauty / Saudi / product-category hashtags.\n- avoid spammy excessive hashtags.\n\n==================================================\nTELEGRAM MESSAGE RULES\n==================================================\n\ntelegram_message must ALWAYS be a non-empty, clear Arabic message for:\n- ask_coupon\n- show_products\n- reply_only\n\nFor generate_video:\ntelegram_message may be:\n\"تمام، جاري تجهيز الفيديو 🎬\"\n\nNever put raw JSON or internal workflow details in telegram_message.\n\n==================================================\nOUTPUT CONSISTENCY — CRITICAL\n==================================================\n\nYour output must NEVER contradict itself.\n\nExamples of forbidden contradictions:\n\nWRONG:\naffiliate_coupon = \"KMMA\"\naction = \"ask_coupon\"\nmissing_requirements = [\"affiliate_coupon\"]\n\nWRONG:\nproduct contains a valid selected product\nbut telegram_message says \"اختار منتج\"\n\nWRONG:\naction = \"generate_video\"\nvideo_generation_ready = false\n\nCorrect consistency rules:\n\nIf affiliate_coupon is non-empty:\n- coupon is not missing.\n\nIf product is selected:\n- product_selection is not missing.\n\nIf action = \"generate_video\":\n- video_generation_ready = true\n- missing_requirements = []\n\nIf video_generation_ready = false:\n- action must not be generate_video.\n\n==================================================\nREQUIRED OUTPUT SHAPE\n==================================================\n\nAlways return one structured object with this shape:\n\n{\n  \"action\": \"\",\n  \"telegram_message\": \"\",\n  \"affiliate_coupon\": \"\",\n  \"product\": {\n    \"id\": 0,\n    \"name\": \"\",\n    \"brand\": \"\",\n    \"category\": \"\",\n    \"url\": \"\",\n    \"image_url\": \"\",\n    \"rating\": 0,\n    \"reviews\": \"\",\n    \"bestseller_rank\": \"\",\n    \"identification_confidence\": \"low\"\n  },\n  \"products\": [],\n  \"verified_facts\": [],\n  \"creative_strategy\": {\n    \"hooks\": [],\n    \"best_hook\": \"\",\n    \"voiceover\": \"\",\n    \"tts_voiceover\": \"\",\n    \"scenes\": [],\n    \"cta\": \"\",\n    \"coupon_placement\": \"\",\n    \"caption\": \"\",\n    \"hashtags\": []\n  },\n  \"video_settings\": {\n    \"platform\": \"TikTok\",\n    \"duration_seconds\": 13,\n    \"aspect_ratio\": \"9:16\",\n    \"width\": 1080,\n    \"height\": 1920,\n    \"fps\": 30,\n    \"faceless\": true,\n    \"language\": \"Arabic\"\n  },\n  \"video_generation_ready\": false,\n  \"missing_requirements\": []\n}\n\n==================================================\nDECISION PRIORITY\n==================================================\n\nFollow this order on every run:\n\n1. Read the current user message/input.\n2. Preserve any valid state already available in the current session.\n3. If coupon is missing:\n   - detect coupon from the current message if possible.\n   - otherwise ask for coupon.\n4. If coupon exists and no active products/product:\n   - perform fresh Noon Saudi Beauty research.\n5. If shortlist exists and user sends 1/2/3:\n   - select by displayed id.\n6. If product selected and waiting for images:\n   - request/acknowledge images.\n7. If user sends \"تم\":\n   - if required state and images exist, generate_video.\n8. Never go backwards in the workflow unless required data is genuinely missing.\n\nThe workflow should feel simple:\nCoupon → Fresh Search → 3 Products → Select → Upload Images → تم → Generate Video.\n\n\n==================================================\nRESEARCH RESULT SAFETY — FINAL V1\n==================================================\n- A valid Noon Saudi URL proves only that the URL is a Saudi Noon product page.\n- availability_status=\"not_verified\" means UNKNOWN, not unavailable.\n- Never claim availability unless available_now=true.\n- Never claim a rating, review count, sold count, bestseller rank, price, or discount unless the research result contains that exact verified field.\n- If the research tool returns valid Beauty products with limited quality signals, show the shortlist without inventing missing facts.\n- Prefer recommended=true when present, but do not invent a reason for the recommendation.\n",
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        800,
+        1152
+      ],
+      "id": "c9de143c-1ead-4cb7-b43d-b6ddace6b4c8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        688,
+        1392
+      ],
+      "id": "cccddc1c-ca10-43e1-8b07-97a3bb22c770",
+      "name": "OpenRouter Chat Model"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Ask Quision').first().json.message.chat.id + '-' + Math.floor(Date.now() / 43200000) }}",
+        "contextWindowLength": 12
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        848,
+        1392
+      ],
+      "id": "00b5e8c1-c754-4465-85d5-d450bce804fb",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"action\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"ask_coupon\",\n        \"show_products\",\n        \"reply_only\",\n        \"generate_video\"\n      ]\n    },\n    \"telegram_message\": {\n      \"type\": \"string\"\n    },\n    \"affiliate_coupon\": {\n      \"type\": \"string\"\n    },\n    \"product\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"id\": {\n          \"type\": \"number\"\n        },\n        \"name\": {\n          \"type\": \"string\"\n        },\n        \"brand\": {\n          \"type\": \"string\"\n        },\n        \"category\": {\n          \"type\": \"string\"\n        },\n        \"url\": {\n          \"type\": \"string\"\n        },\n        \"image_url\": {\n          \"type\": \"string\"\n        },\n        \"rating\": {\n          \"type\": \"number\"\n        },\n        \"reviews\": {\n          \"type\": \"string\"\n        },\n        \"bestseller_rank\": {\n          \"type\": \"string\"\n        },\n        \"identification_confidence\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"id\",\n        \"name\",\n        \"brand\",\n        \"category\",\n        \"url\",\n        \"image_url\",\n        \"rating\",\n        \"reviews\",\n        \"bestseller_rank\",\n        \"identification_confidence\"\n      ]\n    },\n    \"products\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\"\n      }\n    },\n    \"verified_facts\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"creative_strategy\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"hooks\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        \"best_hook\": {\n          \"type\": \"string\"\n        },\n        \"voiceover\": {\n          \"type\": \"string\"\n        },\n        \"tts_voiceover\": {\n          \"type\": \"string\"\n        },\n        \"scenes\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"object\",\n            \"properties\": {\n              \"scene_number\": {\n                \"type\": \"number\"\n              },\n              \"duration_seconds\": {\n                \"type\": \"number\"\n              },\n              \"visual_direction\": {\n                \"type\": \"string\"\n              },\n              \"visual_prompt\": {\n                \"type\": \"string\"\n              },\n              \"on_screen_text\": {\n                \"type\": \"string\"\n              },\n              \"voiceover_text\": {\n                \"type\": \"string\"\n              },\n              \"transition\": {\n                \"type\": \"string\"\n              }\n            },\n            \"required\": [\n              \"scene_number\",\n              \"duration_seconds\",\n              \"visual_direction\",\n              \"visual_prompt\",\n              \"on_screen_text\",\n              \"voiceover_text\",\n              \"transition\"\n            ]\n          }\n        },\n        \"cta\": {\n          \"type\": \"string\"\n        },\n        \"coupon_placement\": {\n          \"type\": \"string\"\n        },\n        \"caption\": {\n          \"type\": \"string\"\n        },\n        \"hashtags\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"required\": [\n        \"hooks\",\n        \"best_hook\",\n        \"voiceover\",\n        \"tts_voiceover\",\n        \"scenes\",\n        \"cta\",\n        \"coupon_placement\",\n        \"caption\",\n        \"hashtags\"\n      ]\n    },\n    \"video_settings\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"platform\": {\n          \"type\": \"string\"\n        },\n        \"duration_seconds\": {\n          \"type\": \"number\"\n        },\n        \"aspect_ratio\": {\n          \"type\": \"string\"\n        },\n        \"width\": {\n          \"type\": \"number\"\n        },\n        \"height\": {\n          \"type\": \"number\"\n        },\n        \"fps\": {\n          \"type\": \"number\"\n        },\n        \"faceless\": {\n          \"type\": \"boolean\"\n        },\n        \"language\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"platform\",\n        \"duration_seconds\",\n        \"aspect_ratio\",\n        \"width\",\n        \"height\",\n        \"fps\",\n        \"faceless\",\n        \"language\"\n      ]\n    },\n    \"video_generation_ready\": {\n      \"type\": \"boolean\"\n    },\n    \"missing_requirements\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\n    \"action\",\n    \"telegram_message\",\n    \"affiliate_coupon\",\n    \"product\",\n    \"products\",\n    \"verified_facts\",\n    \"creative_strategy\",\n    \"video_settings\",\n    \"video_generation_ready\",\n    \"missing_requirements\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1008,
+        1392
+      ],
+      "id": "d6deef2d-005d-4f5f-b073-0d8bbb49eebf",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output?.action ?? $json.action }}",
+                    "rightValue": "generate_video",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b0ee6ab7-cdd8-44a7-8a0b-5f95a26a14b9"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1088,
+        1152
+      ],
+      "id": "8e70fb77-2d32-461d-ae80-171d36dc9848",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message?.chat?.id || $('Ask Quision').first().json.message.chat.id }}",
+        "text": "={{ $json.output?.telegram_message ?? $json.telegram_message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1296,
+        1344
+      ],
+      "id": "991aceb7-4cb5-4860-991e-a0cf0f440b33",
+      "name": "Send a text message"
+    },
+    {
+      "parameters": {
+        "jsCode": "const root=$json.output ?? $json;\nconst product=root.product ?? {};\nconst strategy=root.creative_strategy ?? {};\nconst raw=Array.isArray(strategy.scenes)?strategy.scenes:[];\nif(raw.length!==4) throw new Error(`Expected 4 scenes, received ${raw.length}`);\nconst d=[3,3,3,4];\n\nconst scenes=raw.map((s,i)=>({\n  scene_number:i+1,duration_seconds:d[i],\n  visual_direction:s.visual_direction ?? \"\",\n  visual_prompt:s.visual_prompt ?? \"\",\n  on_screen_text:s.on_screen_text ?? \"\",\n  voiceover_text:s.voiceover_text ?? \"\",\n  transition:s.transition ?? \"\"\n}));\n\nreturn [{json:{\n  action:root.action ?? \"generate_video\",\n  telegram_message:root.telegram_message ?? \"\",\n  affiliate_coupon:root.affiliate_coupon ?? \"\",\n  product:{\n    id:product.id ?? 0,name:product.name ?? \"\",brand:product.brand ?? \"\",\n    category:product.category ?? \"\",url:product.url ?? \"\",image_url:product.image_url ?? \"\",\n    rating:Number(product.rating ?? 0),reviews:product.reviews ?? \"\",\n    bestseller_rank:product.bestseller_rank ?? \"\",\n    identification_confidence:product.identification_confidence ?? \"low\"\n  },\n  verified_facts:Array.isArray(root.verified_facts)?root.verified_facts:[],\n  creative_strategy:{\n    hooks:Array.isArray(strategy.hooks)?strategy.hooks:[],\n    best_hook:strategy.best_hook ?? \"\",\n    voiceover:strategy.voiceover ?? \"\",\n    tts_voiceover:strategy.tts_voiceover ?? strategy.voiceover ?? \"\",\n    scenes,cta:strategy.cta ?? \"\",coupon_placement:strategy.coupon_placement ?? \"\",\n    caption:strategy.caption ?? \"\",hashtags:Array.isArray(strategy.hashtags)?strategy.hashtags:[]\n  },\n  video_settings:{platform:\"TikTok\",duration_seconds:13,aspect_ratio:\"9:16\",width:1080,height:1920,fps:30,faceless:true,language:\"Arabic\"},\n  total_scenes:4,total_duration_seconds:13,video_generation_ready:true,missing_requirements:[]\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        1088
+      ],
+      "id": "63783aec-b782-4b13-8259-438db8a942bb",
+      "name": "Prepare Video Payload"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data=$json;\nconst s=data.creative_strategy ?? {};\nconst scenes=Array.isArray(s.scenes)?s.scenes:[];\nif(scenes.length!==4) throw new Error(`Expected 4 scenes, received ${scenes.length}`);\nconst d=[3,3,3,4];\nreturn scenes.map((scene,i)=>({json:{\n  scene_number:i+1,duration_seconds:d[i],\n  visual_direction:scene.visual_direction ?? \"\",visual_prompt:scene.visual_prompt ?? \"\",\n  on_screen_text:scene.on_screen_text ?? \"\",voiceover_text:scene.voiceover_text ?? \"\",\n  transition:scene.transition ?? \"\",best_hook:s.best_hook ?? \"\",\n  full_voiceover:s.voiceover ?? \"\",full_tts_voiceover:s.tts_voiceover ?? s.voiceover ?? \"\",\n  cta:s.cta ?? \"\",coupon_placement:s.coupon_placement ?? \"\",caption:s.caption ?? \"\",\n  hashtags:s.hashtags ?? [],hooks:s.hooks ?? [],\n  affiliate_coupon:data.affiliate_coupon ?? \"\",product:data.product ?? {},\n  video_settings:data.video_settings ?? {},total_scenes:4\n}}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        1088
+      ],
+      "id": "bf6ff1d6-ea9d-4b4f-b0dc-752a98390b79",
+      "name": "Split Scenes"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const packed=$('Pack Product Images').first();\nreturn {json:{...$json},binary:packed.binary ?? {}};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        1088
+      ],
+      "id": "e6cbdf36-a2d2-415f-b419-5ac48981e12b",
+      "name": "Attach Product Images"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items=$input.all();\nif(!items.length) throw new Error('No scenes received');\nreturn items.map((item,index)=>{\n  const binaries=item.binary ?? {};\n  const keys=Object.keys(binaries);\n  if(!keys.length) throw new Error(`No uploaded images found for scene ${index+1}`);\n  const selected=index % keys.length;\n  const key=keys[selected];\n  return {\n    json:{...item.json,assigned_image_key:key,assigned_image_number:selected+1,\n          uploaded_images_count:keys.length,\n          scene_file_name:`scene_${String(item.json.scene_number??index+1).padStart(2,'0')}.jpg`},\n    binary:{source_image:binaries[key]}\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        1088
+      ],
+      "id": "ee9c57b5-c011-4bb9-89f4-ec18fe0c905e",
+      "name": "Assign Uploaded Images To Scenes"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "binaryPropertyName": "source_image",
+        "filename": "={{ $json.scene_file_name }}"
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        1008
+      ],
+      "id": "a11d2c48-a3c3-4bca-9272-2cf41ea7e71d",
+      "name": "FFmpeg - Upload Images"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2288,
+        1120
+      ],
+      "id": "386bf3de-5261-4e09-81e3-50339b19eeba",
+      "name": "Merge Uploaded Files With Scenes"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items=$input.all();\nconst scenes=items\n  .sort((a,b)=>Number(a.json.scene_number??0)-Number(b.json.scene_number??0))\n  .map((item,i)=>({\n    scene_number:i+1,duration_seconds:[3,3,3,4][i],\n    fileUrl:item.json.fileUrl,downloadUrl:item.json.downloadUrl ?? \"\",\n    on_screen_text:item.json.on_screen_text ?? \"\",transition:item.json.transition ?? \"\"\n  }));\nif(scenes.length!==4 || scenes.some(x=>!x.fileUrl)) throw new Error(`Need exactly 4 uploaded scene files. Received ${scenes.length}.`);\nconst first=items[0]?.json ?? {};\nreturn [{json:{\n  scenes,width:1080,height:1920,fps:30,\n  affiliate_coupon:first.affiliate_coupon ?? \"\",\n  full_voiceover:first.full_voiceover ?? \"\",\n  full_tts_voiceover:first.full_tts_voiceover ?? first.full_voiceover ?? \"\",\n  output_file_name:`tiktok_slideshow_${Date.now()}.mp4`\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        1120
+      ],
+      "id": "d3d9d1a2-d695-4247-bae5-f7107e014cd9",
+      "name": "Build Slideshow Manifest"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data=$input.first().json;\nconst scenes=data.scenes ?? [];\nif(scenes.length!==4) throw new Error('Expected 4 scenes');\n\nlet coupon=String(data.affiliate_coupon ?? '').trim();\nif(!coupon){\n  try{coupon=String($('Prepare Video Payload').first().json.affiliate_coupon ?? '').trim();}catch(e){}\n}\nif(!coupon) throw new Error('affiliate_coupon is empty.');\n\nconst AR={\n'ء':['\\uFE80',null,null,null],'آ':['\\uFE81','\\uFE82',null,null],'أ':['\\uFE83','\\uFE84',null,null],\n'ؤ':['\\uFE85','\\uFE86',null,null],'إ':['\\uFE87','\\uFE88',null,null],'ئ':['\\uFE89','\\uFE8A','\\uFE8B','\\uFE8C'],\n'ا':['\\uFE8D','\\uFE8E',null,null],'ب':['\\uFE8F','\\uFE90','\\uFE91','\\uFE92'],'ة':['\\uFE93','\\uFE94',null,null],\n'ت':['\\uFE95','\\uFE96','\\uFE97','\\uFE98'],'ث':['\\uFE99','\\uFE9A','\\uFE9B','\\uFE9C'],\n'ج':['\\uFE9D','\\uFE9E','\\uFE9F','\\uFEA0'],'ح':['\\uFEA1','\\uFEA2','\\uFEA3','\\uFEA4'],'خ':['\\uFEA5','\\uFEA6','\\uFEA7','\\uFEA8'],\n'د':['\\uFEA9','\\uFEAA',null,null],'ذ':['\\uFEAB','\\uFEAC',null,null],'ر':['\\uFEAD','\\uFEAE',null,null],'ز':['\\uFEAF','\\uFEB0',null,null],\n'س':['\\uFEB1','\\uFEB2','\\uFEB3','\\uFEB4'],'ش':['\\uFEB5','\\uFEB6','\\uFEB7','\\uFEB8'],'ص':['\\uFEB9','\\uFEBA','\\uFEBB','\\uFEBC'],\n'ض':['\\uFEBD','\\uFEBE','\\uFEBF','\\uFEC0'],'ط':['\\uFEC1','\\uFEC2','\\uFEC3','\\uFEC4'],'ظ':['\\uFEC5','\\uFEC6','\\uFEC7','\\uFEC8'],\n'ع':['\\uFEC9','\\uFECA','\\uFECB','\\uFECC'],'غ':['\\uFECD','\\uFECE','\\uFECF','\\uFED0'],\n'ف':['\\uFED1','\\uFED2','\\uFED3','\\uFED4'],'ق':['\\uFED5','\\uFED6','\\uFED7','\\uFED8'],'ك':['\\uFED9','\\uFEDA','\\uFEDB','\\uFEDC'],\n'ل':['\\uFEDD','\\uFEDE','\\uFEDF','\\uFEE0'],'م':['\\uFEE1','\\uFEE2','\\uFEE3','\\uFEE4'],'ن':['\\uFEE5','\\uFEE6','\\uFEE7','\\uFEE8'],\n'ه':['\\uFEE9','\\uFEEA','\\uFEEB','\\uFEEC'],'و':['\\uFEED','\\uFEEE',null,null],'ى':['\\uFEEF','\\uFEF0',null,null],\n'ي':['\\uFEF1','\\uFEF2','\\uFEF3','\\uFEF4']\n};\nconst canPrev=c=>Boolean(AR[c]?.[1]);\nconst canNext=c=>Boolean(AR[c]?.[2]);\n\nfunction shapeWord(word){\n  const chars=Array.from(word);\n  return chars.map((ch,i)=>{\n    if(!AR[ch]) return ch;\n    const p=chars[i-1],n=chars[i+1],f=AR[ch];\n    const jp=p&&AR[p]&&canNext(p)&&canPrev(ch);\n    const jn=n&&AR[n]&&canNext(ch)&&canPrev(n);\n    if(jp&&jn&&f[3]) return f[3];\n    if(jp&&f[1]) return f[1];\n    if(jn&&f[2]) return f[2];\n    return f[0];\n  }).join('');\n}\nfunction prepareArabic(text=''){\n  text=String(text);\n  if(!/[\\u0600-\\u06FF]/.test(text)) return text;\n  const tokens=text.split(/(\\s+)/).map(t=>{\n    if(/[\\u0600-\\u06FF]/.test(t)) return Array.from(shapeWord(t)).reverse().join('');\n    return t;\n  });\n  return tokens.reverse().join('');\n}\nfunction esc(text=''){\n  return String(text).replace(/⭐/g,'★').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\")\n    .replace(/:/g,'\\\\:').replace(/%/g,'\\\\%').replace(/\\n/g,' ');\n}\nfunction reEsc(t=''){return String(t).replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&');}\nfunction fontSize(t=''){const l=String(t).length;return l<=20?58:l<=30?50:44;}\n\nconst filters=scenes.map((scene,i)=>{\n  let original=String(scene.on_screen_text ?? '').trim();\n  const last=i===scenes.length-1;\n  original=original.replace(new RegExp(reEsc(coupon),'ig'),'').replace(/\\s+/g,' ').trim();\n  const txt=esc(prepareArabic(original));\n  let f=`[${i}:v]scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30,format=yuv420p,setpts=PTS-STARTPTS`;\n  if(txt){\n    f+=`,drawtext=font='DejaVu Sans':text='${txt}':fontsize=${fontSize(original)}:fontcolor=white:borderw=4:bordercolor=black:box=1:boxcolor=black@0.45:boxborderw=18:x=(w-text_w)/2:y=${last?'h*0.70':'h*0.78'}`;\n  }\n  if(last){\n    f+=`,drawtext=font='DejaVu Sans':text='${esc(coupon)}':fontsize=96:fontcolor=#FFB000:borderw=6:bordercolor=black:box=1:boxcolor=black@0.58:boxborderw=24:x=(w-text_w)/2:y=h*0.81`;\n  }\n  return f+`[v${i}]`;\n});\nconst concat=scenes.map((_,i)=>`[v${i}]`).join('')+`concat=n=${scenes.length}:v=1:a=0[v]`;\nreturn [{json:{...data,affiliate_coupon:coupon,filter_graph_with_text:[...filters,concat].join(';')}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        1120
+      ],
+      "id": "8514ca6d-c689-4df7-a194-f4f8bab1dc92",
+      "name": "Build Text Overlay Filter"
+    },
+    {
+      "parameters": {
+        "inputs": {
+          "input": [
+            {
+              "url": "={{ String($json.scenes[0].fileUrl).replace(/\\s+/g, '') }}",
+              "options": {
+                "option": [
+                  {
+                    "option": "-loop",
+                    "argument": "1"
+                  },
+                  {
+                    "option": "-framerate",
+                    "argument": "30"
+                  },
+                  {
+                    "option": "-t",
+                    "argument": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "={{ String($json.scenes[1].fileUrl).replace(/\\s+/g, '') }}",
+              "options": {
+                "option": [
+                  {
+                    "option": "-loop",
+                    "argument": "1"
+                  },
+                  {
+                    "option": "-framerate",
+                    "argument": "30"
+                  },
+                  {
+                    "option": "-t",
+                    "argument": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "={{ String($json.scenes[2].fileUrl).replace(/\\s+/g, '') }}",
+              "options": {
+                "option": [
+                  {
+                    "option": "-loop",
+                    "argument": "1"
+                  },
+                  {
+                    "option": "-framerate",
+                    "argument": "30"
+                  },
+                  {
+                    "option": "-t",
+                    "argument": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "={{ String($json.scenes[3].fileUrl).replace(/\\s+/g, '') }}",
+              "options": {
+                "option": [
+                  {
+                    "option": "-loop",
+                    "argument": "1"
+                  },
+                  {
+                    "option": "-framerate",
+                    "argument": "30"
+                  },
+                  {
+                    "option": "-t",
+                    "argument": "4"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "option": [
+            {
+              "option": "-c:v",
+              "argument": "libx264"
+            },
+            {
+              "option": "-pix_fmt",
+              "argument": "yuv420p"
+            },
+            {
+              "option": "-r",
+              "argument": "30"
+            },
+            {
+              "option": "-map",
+              "argument": "[v]"
+            }
+          ]
+        },
+        "metadata": "{}",
+        "filters": {
+          "filter": [
+            {
+              "filter": "={{ $json.filter_graph_with_text }}"
+            }
+          ]
+        }
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        1072
+      ],
+      "id": "a357a42a-4013-4d26-90a4-d4f9cf21f85c",
+      "name": "Create a transcode job"
+    },
+    {
+      "parameters": {
+        "operation": "wait",
+        "jobId": "={{ $json.id }}"
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        3088,
+        1072
+      ],
+      "id": "ca86b657-c5c7-4b69-a06e-efd7b63d30bf",
+      "name": "Wait For Video"
+    },
+    {
+      "parameters": {
+        "operation": "getDownloadUrl",
+        "jobId": "={{ $json.id }}"
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        3280,
+        1072
+      ],
+      "id": "5af671b5-2753-4f97-8dd2-8962cb9b2331",
+      "name": "Get Video Download URL"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "video"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3488,
+        1072
+      ],
+      "id": "c1c43009-47b8-4ec8-80ea-ece0cb3b42a1",
+      "name": "Download Final MP4"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "binaryPropertyName": "video",
+        "filename": "final_video.mp4"
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        3680,
+        1072
+      ],
+      "id": "03828836-e7dc-4539-9985-b20cb289588d",
+      "name": "Upload Final Video"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data=$input.first().json;\nlet text=String(data.full_tts_voiceover ?? '').trim();\nif(!text){try{text=String($('Prepare Video Payload').first().json.creative_strategy?.tts_voiceover ?? '').trim();}catch(e){}}\nif(!text){try{text=String($('Prepare Video Payload').first().json.creative_strategy?.voiceover ?? '').trim();}catch(e){}}\nif(!text) throw new Error('TTS voiceover text is empty.');\nreturn [{json:{...data,voiceover_text:text,target_video_duration:13}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2896,
+        1344
+      ],
+      "id": "a9f29553-2931-414a-ae77-d4f05b611c3d",
+      "name": "Prepare Voiceover Text"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/audio/speech",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  model: \"google/gemini-3.1-flash-tts-preview\",\n  input: $json.voiceover_text,\n  voice: \"Leda\",\n  response_format: \"mp3\"\n}\n}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "voiceover"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3104,
+        1344
+      ],
+      "id": "57a30945-a13d-445a-9580-f51356b728b1",
+      "name": "OpenRouter - Generate Voiceover"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "binaryPropertyName": "voiceover",
+        "filename": "voiceover.mp3"
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        3296,
+        1344
+      ],
+      "id": "e02aa77f-8ead-4363-990f-aabfbdc99535",
+      "name": "Upload Voiceover"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3904,
+        1232
+      ],
+      "id": "70fb7580-796e-4483-9530-b852cf21414e",
+      "name": "Merge Video + Voiceover Data"
+    },
+    {
+      "parameters": {
+        "inputs": {
+          "input": [
+            {
+              "url": "={{ $('Upload Final Video').first().json.fileUrl }}"
+            },
+            {
+              "url": "={{ $('Upload Voiceover').first().json.fileUrl }}"
+            }
+          ]
+        },
+        "options": {
+          "option": [
+            {
+              "option": "-c:v",
+              "argument": "copy"
+            },
+            {
+              "option": "-c:a",
+              "argument": "aac"
+            },
+            {
+              "option": "-map",
+              "argument": "0:v:0"
+            },
+            {
+              "option": "-map",
+              "argument": "1:a:0"
+            }
+          ]
+        },
+        "metadata": "{}"
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        4096,
+        1232
+      ],
+      "id": "eaf18bea-c997-474c-8854-266136b74832",
+      "name": "Add Voiceover to Final Video"
+    },
+    {
+      "parameters": {
+        "operation": "wait",
+        "jobId": "={{ $json.id }}"
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        4304,
+        1232
+      ],
+      "id": "6afe3dad-f6c0-4638-a2b9-397445577c1a",
+      "name": "Wait For Final Video"
+    },
+    {
+      "parameters": {
+        "operation": "getDownloadUrl",
+        "jobId": "={{ $json.id }}"
+      },
+      "type": "@ffmpeg-micro/n8n-nodes-ffmpeg-micro.ffmpegMicro",
+      "typeVersion": 1,
+      "position": [
+        4496,
+        1232
+      ],
+      "id": "b9cae2fe-8df6-43d5-9dff-585f9b914f97",
+      "name": "Get Final Video URL"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "video"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4704,
+        1232
+      ],
+      "id": "62bead5c-94ef-4f66-bd8d-7472d73ec4ca",
+      "name": "Download Final Video"
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "={{ $('Ask Quision').first().json.message.chat.id }}",
+        "binaryData": true,
+        "binaryPropertyName": "video",
+        "additionalFields": {
+          "caption": "الفيديو النهائي جاهز ✅"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4896,
+        1232
+      ],
+      "id": "f8b31e67-c848-4850-bcf4-ce2266908310",
+      "name": "Send Final Video Telegram"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        64
+      ],
+      "id": "c39717d2-9191-4c35-9481-66583bbc2eea",
+      "name": "Research Tool Entry"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n {json:{attempt:1,search_query:'site:noon.com/saudi-en/ \"Best Price KSA\" mascara Maybelline Essence LOREAL'}},\n {json:{attempt:2,search_query:'site:noon.com/saudi-en/ \"Best Price KSA\" skincare serum moisturizer'}},\n {json:{attempt:3,search_query:'site:noon.com/saudi-en/ \"Best Price KSA\" sunscreen skincare SPF'}},\n {json:{attempt:4,search_query:'site:noon.com/saudi-en/ \"Best Price KSA\" perfume fragrance beauty'}},\n {json:{attempt:5,search_query:'site:noon.com/saudi-en/ \"Best Price KSA\" makeup cosmetics blush lipstick concealer'}},\n {json:{attempt:6,search_query:'site:noon.com/saudi-en/ \"Best Price KSA\" haircare body care beauty bestseller'}}\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        64
+      ],
+      "id": "eb181a21-fc58-4f8d-bee5-7013456c5d3e",
+      "name": "Research - Create Search Attempts"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        128,
+        64
+      ],
+      "id": "b5576fa0-72c4-4972-ac67-d321bf4e8740",
+      "name": "Research - Loop Attempts"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  model: \"openai/gpt-4.1-mini\",\n  messages: [{\n    role: \"user\",\n    content: `Find real Beauty & Cosmetics PRODUCT pages from Noon Saudi Arabia.\n\nSearch query:\n${$json.search_query}\n\nHARD REQUIREMENTS:\n- Noon Saudi Arabia ONLY.\n- URL must start with https://www.noon.com/saudi-en/\n- Return INDIVIDUAL PRODUCT pages only.\n- Product page must contain a Noon product code and /p in the URL.\n- Beauty & Cosmetics only: skincare, makeup, sunscreen, haircare, body care, perfume/fragrance.\n- Ignore UAE, Qatar, Egypt, Noon Minutes, category pages, brand pages, search pages, home fragrance, health/medicine and non-beauty products.\n- Do not invent URLs, ratings, reviews, sales, availability, prices or discounts.\n- Do not reject a real Saudi Beauty product because popularity fields are missing.\n- Prefer recognizable/content-friendly products when possible.\n\nFind as many useful exact Saudi product pages as the search can verify.`\n  }],\n  tools: [{\n    type: \"openrouter:web_search\",\n    parameters: {engine:\"parallel\",mode:\"turbo\",max_results:10,max_total_results:10,max_uses:1,allowed_domains:[\"noon.com\"]}\n  }],\n  max_tool_calls: 1\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        336,
+        208
+      ],
+      "id": "6fc097d7-b294-459b-a829-2d441e3cb856",
+      "name": "Research - Search Noon via OpenRouter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data=$input.first().json;\nconst msg=data.choices?.[0]?.message ?? {};\nconst ann=Array.isArray(msg.annotations)?msg.annotations:[];\nconst num=v=>Number(String(v??'').replace(/,/g,'').trim())||0;\nconst clean=v=>String(v??'').replace(/\\s*\\|\\s*Best Price KSA.*$/i,'').replace(/\\s+/g,' ').trim();\n\nconst products=ann.filter(a=>a?.type==='url_citation').map(a=>{\n const c=a.url_citation ?? {};\n const url=String(c.url??'').trim(), name=clean(c.title), snippet=String(c.content??'').trim();\n const m=url.match(/\\/([A-Z0-9]+)\\/p\\/?(?:[?#].*)?$/i);\n const code=m?.[1]?.toUpperCase() ?? '';\n const exact=url.startsWith('https://www.noon.com/saudi-en/') && !!code;\n const unavailable=/sorry!?\\s*this product is not available|available soon|out of stock|sold out|currently unavailable|coming back soon/i.test(snippet);\n const evidence=/add(?:ed)? to cart|get it by|get it tomorrow|delivery information|free delivery|noon-express|order in\\s*\\d|only\\s+\\d+\\s+left in stock/i.test(snippet);\n const available=exact && !unavailable && evidence;\n\n let rating=0,reviews=0;\n const rm=snippet.match(/\\b([1-5](?:\\.\\d)?)\\s*(?:starFilledV2|starFilled|stars?|★|⭐)/i);\n if(rm) rating=num(rm[1]);\n const rv=snippet.match(/\\b([\\d,]+)\\s*(?:ratings?|reviews?)\\b/i);\n if(rv) reviews=num(rv[1]);\n\n const sm=snippet.match(/\\b([\\d,]+)\\+\\s*(?:sold|bought)\\s+recently\\b/i);\n const sold=sm?num(sm[1]):0;\n const bestseller=/\\bbest\\s*seller\\b|\\bbestseller\\b/i.test(snippet);\n const rank=snippet.match(/#\\s*(\\d+)\\s+in\\s+/i)||snippet.match(/(?:best\\s*seller|bestseller)\\s*#?\\s*(\\d+)/i);\n\n let q=0;\n if(rating>=4.7)q+=5;else if(rating>=4.5)q+=4;else if(rating>=4.2)q+=3;\n if(reviews>=1000)q+=5;else if(reviews>=500)q+=4;else if(reviews>=100)q+=3;else if(reviews>0)q+=1;\n if(sold>=1000)q+=6;else if(sold>=500)q+=5;else if(sold>=100)q+=4;else if(sold>0)q+=2;\n if(bestseller)q+=4;if(available)q+=2;\n\n const popularity=reviews>0||sold>0||bestseller;\n const pass=exact&&available&&rating>=4.2&&(reviews>=100||sold>=100||bestseller);\n\n return {search_valid:exact,name,url,source_product_code:code,search_snippet:snippet,exact_match:exact,\n   available_now:available,rating,review_count:reviews,bestseller,bestseller_rank:rank?.[1]??'',\n   sold_signal:sm?sm[0]:'',sold_recent_count:sold,popularity_verified:popularity,\n   quality_score:q,pass_quality:pass,recommended:false,source:'Noon Saudi',target_country:'Saudi Arabia',\n   verified_url:exact,availability_status:available?'verified_available':(unavailable?'verified_unavailable':'not_verified')};\n}).filter(p=>p.search_valid);\n\nif(!products.length) return [{json:{search_valid:false,reason:'No Saudi Noon product result found'}}];\nreturn products.map(p=>({json:p}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        208
+      ],
+      "id": "fdd5ac12-0eb2-4639-8149-fb5ccf04dc37",
+      "name": "Research - Validate Saudi Results"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw=$input.all().map(i=>i.json).filter(Boolean);\nconst n=v=>Number(v??0)||0,s=v=>String(v??'').trim();\n\nlet p=raw.filter(x=>x.search_valid===true&&x.name&&x.url);\nconst seen=new Map();\nfor(const x of p){const k=s(x.source_product_code||x.url).toUpperCase();if(k&&!seen.has(k))seen.set(k,x);}\np=[...seen.values()];\n\np=p.filter(x=>{\n const url=s(x.url);\n if(!url.startsWith('https://www.noon.com/saudi-en/'))return false;\n if(!/\\/[A-Z0-9]+\\/p\\/?(?:[?#].*)?$/i.test(url))return false;\n const t=`${s(x.name)} ${s(x.search_snippet)} ${url}`.toLowerCase();\n const beauty=/beauty|cosmetic|cosmetics|skincare|skin care|serum|moisturizer|moisturiser|sunscreen|sun care|\\bspf\\b|makeup|mascara|lipstick|concealer|foundation|blush|eyeliner|hair care|haircare|body care|body lotion|perfume|fragrance|eau de parfum|eau de toilette|\\bedp\\b|\\bedt\\b/.test(t);\n const blocked=/health & nutrition|health care|healing ointment|medicine|medical|pharmacy|pain relief|analgesic|antibiotic|antiseptic|wound|supplement|home & kitchen|home decor|home fragrance|room fragrance|air freshener|reed diffuser|scented candle|\\bcandle\\b/.test(t);\n return beauty&&!blocked;\n});\n\np=p.map(x=>{\n let score=n(x.quality_score);\n if(x.available_now===true)score+=3;\n if(x.pass_quality===true)score+=4;\n if(x.bestseller===true)score+=2;\n score+=Math.min(n(x.review_count)/250,4)+Math.min(n(x.sold_recent_count)/250,4);\n return {...x,ranking_score:score};\n});\n\np.sort((a,b)=>n(b.ranking_score)-n(a.ranking_score)||n(b.sold_recent_count)-n(a.sold_recent_count)||n(b.review_count)-n(a.review_count)||n(b.rating)-n(a.rating));\nconst strong=p.filter(x=>x.available_now===true&&(x.pass_quality===true||n(x.quality_score)>=6));\nconst src=strong.length?strong:p;\nconst top=src.slice(0,3).map((x,i)=>({...x,id:i+1,recommended:strong.length>0&&i===0}));\n\nreturn [{json:{products:top,total_products:top.length,recommended_product_id:strong.length&&top.length?1:null,\n search_success:top.length>0,quality_mode:strong.length?'strong_verified_signals':'valid_products_limited_signals',\n debug:{received:raw.length,valid_beauty_saudi_products:p.length,strong_products:strong.length,returned_top_products:top.length}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -80
+      ],
+      "id": "c661d40c-f6b6-4b68-a7d6-d53ee59c2a4c",
+      "name": "Research - Combine & Rank"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input=$input.first().json;\nconst products=Array.isArray(input.products)?input.products:[];\nconst clean=v=>String(v??'').replace(/\\s*\\|\\s*Best Price KSA.*$/i,'').replace(/\\s+/g,' ').trim();\nfunction cat(name='',url='',snippet=''){\n const t=`${name} ${url} ${snippet}`.toLowerCase();\n if(t.includes('mascara'))return'Makeup - Mascara';\n if(/lipstick|lip tint|lip gloss/.test(t))return'Makeup - Lips';\n if(/concealer|foundation|blush/.test(t))return'Makeup - Face';\n if(/eyeliner|eye shadow|eyeshadow/.test(t))return'Makeup - Eyes';\n if(/sunscreen|sun screen|sun care|\\bspf\\b/.test(t))return'Skincare - Sunscreen';\n if(/face cream|capsule cream|moisturizer|moisturiser/.test(t))return'Skincare - Moisturizer';\n if(/serum|niacinamide|hyaluronic/.test(t))return'Skincare - Serum';\n if(/hair care|haircare|shampoo|conditioner|hair mask|hair oil/.test(t))return'Hair Care';\n if(/body lotion|body butter|body oil|body care/.test(t))return'Body Care';\n if(/perfume|parfum|fragrance|eau de parfum|eau de toilette|\\bedp\\b|\\bedt\\b/.test(t))return'Fragrance';\n return'Beauty & Cosmetics';\n}\nconst normalized=products.map((x,i)=>({...x,id:i+1,name:clean(x.name),category:x.category||cat(x.name,x.url,x.search_snippet),\n source:'Noon Saudi',target_country:'Saudi Arabia',verified_url:String(x.url??'').startsWith('https://www.noon.com/saudi-en/')}));\nreturn [{json:{...input,products:normalized,total_products:normalized.length,source:'Noon Saudi',target_country:'Saudi Arabia'}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -80
+      ],
+      "id": "12ba0ded-8eef-41e0-a759-1cb6445bef4b",
+      "name": "Research - Normalize Beauty Products"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input=$input.first().json;\nconst p=Array.isArray(input.products)?input.products.slice(0,3):[];\nif(!p.length)return[{json:{products:[],total_products:0,recommended_product_id:null,telegram_message:'ملقتش دلوقتي منتجات Beauty مناسبة من نون السعودية. جرّب البحث مرة تانية.',search_success:false,source:'Noon Saudi',target_country:'Saudi Arabia'}}];\n\nconst lines=p.map((x,i)=>{\n const d=[];\n if(Number(x.rating??0)>0)d.push(`⭐ ${Number(x.rating).toFixed(1)}`);\n if(Number(x.review_count??0)>0)d.push(`${Number(x.review_count)} تقييم`);\n if(Number(x.sold_recent_count??0)>0)d.push(`${Number(x.sold_recent_count)}+ مبيع مؤخرًا`);\n if(x.bestseller===true)d.push(x.bestseller_rank?`🔥 Bestseller #${x.bestseller_rank}`:'🔥 Bestseller');\n if(x.available_now===true)d.push('✅ التوفر متحقق');\n return [`${i+1}️⃣ ${x.name}`,x.category?`التصنيف: ${x.category}`:'',d.length?d.join(' • '):'',`🔗 ${x.url}`].filter(Boolean).join('\\n');\n});\nconst strong=input.quality_mode==='strong_verified_signals';\nreturn[{json:{\n products:p.map((x,i)=>({...x,id:i+1,recommended:strong&&i===0})),\n total_products:p.length,recommended_product_id:strong?1:null,\n telegram_message:(strong?`لقيتلك أفضل ${p.length} منتجات من نون السعودية:\\n\\n`:`لقيتلك ${p.length} منتجات Beauty حقيقية من نون السعودية، لكن بعض إشارات الجودة/التوفر غير مكتملة:\\n\\n`)+lines.join('\\n\\n')+'\\n\\nاختار رقم المنتج اللي عايز نشتغل عليه.',\n search_success:true,source:'Noon Saudi',target_country:'Saudi Arabia',quality_mode:input.quality_mode\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        -80
+      ],
+      "id": "823478d1-5443-4bf3-8815-42fde888313a",
+      "name": "Research - Prepare Tool Result"
+    },
+    {
+      "parameters": {
+        "description": "Search and rank fresh Beauty & Cosmetics products from Noon Saudi Arabia only. Returns up to 3 real Saudi Noon product pages. Never invent URLs, ratings, reviews, sales, availability, prices or discounts.",
+        "workflowId": {
+          "__rl": true,
+          "value": "RECONNECT_IN_N8N",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        1568
+      ],
+      "id": "6db40c25-cf8b-46b1-a436-6b4b29d531cb",
+      "name": "Call 'Affiliate_NOON_COMPLETE_V1'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ask Quision": {
+      "main": [
+        [
+          {
+            "node": "IF Has Photo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Has Photo?": {
+      "main": [
+        [
+          {
+            "node": "Save Photo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Done?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Photo": {
+      "main": [
+        [
+          {
+            "node": "Confirm Photo Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Done?": {
+      "main": [
+        [
+          {
+            "node": "Get Uploaded Photos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Uploaded Photos": {
+      "main": [
+        [
+          {
+            "node": "Keep Current Session Photos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Current Session Photos": {
+      "main": [
+        [
+          {
+            "node": "Has Stored Photos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Stored Photos?": {
+      "main": [
+        [
+          {
+            "node": "Get Telegram File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Telegram File": {
+      "main": [
+        [
+          {
+            "node": "Pack Product Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pack Product Images": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Prepare Video Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Video Payload": {
+      "main": [
+        [
+          {
+            "node": "Split Scenes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Scenes": {
+      "main": [
+        [
+          {
+            "node": "Attach Product Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Product Images": {
+      "main": [
+        [
+          {
+            "node": "Assign Uploaded Images To Scenes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assign Uploaded Images To Scenes": {
+      "main": [
+        [
+          {
+            "node": "FFmpeg - Upload Images",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Uploaded Files With Scenes",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "FFmpeg - Upload Images": {
+      "main": [
+        [
+          {
+            "node": "Merge Uploaded Files With Scenes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Uploaded Files With Scenes": {
+      "main": [
+        [
+          {
+            "node": "Build Slideshow Manifest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slideshow Manifest": {
+      "main": [
+        [
+          {
+            "node": "Build Text Overlay Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Text Overlay Filter": {
+      "main": [
+        [
+          {
+            "node": "Create a transcode job",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Voiceover Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a transcode job": {
+      "main": [
+        [
+          {
+            "node": "Wait For Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait For Video": {
+      "main": [
+        [
+          {
+            "node": "Get Video Download URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Download URL": {
+      "main": [
+        [
+          {
+            "node": "Download Final MP4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Final MP4": {
+      "main": [
+        [
+          {
+            "node": "Upload Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Voiceover Text": {
+      "main": [
+        [
+          {
+            "node": "OpenRouter - Generate Voiceover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter - Generate Voiceover": {
+      "main": [
+        [
+          {
+            "node": "Upload Voiceover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Final Video": {
+      "main": [
+        [
+          {
+            "node": "Merge Video + Voiceover Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Voiceover": {
+      "main": [
+        [
+          {
+            "node": "Merge Video + Voiceover Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Video + Voiceover Data": {
+      "main": [
+        [
+          {
+            "node": "Add Voiceover to Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Voiceover to Final Video": {
+      "main": [
+        [
+          {
+            "node": "Wait For Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait For Final Video": {
+      "main": [
+        [
+          {
+            "node": "Get Final Video URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Final Video URL": {
+      "main": [
+        [
+          {
+            "node": "Download Final Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Final Video": {
+      "main": [
+        [
+          {
+            "node": "Send Final Video Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Tool Entry": {
+      "main": [
+        [
+          {
+            "node": "Research - Create Search Attempts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research - Create Search Attempts": {
+      "main": [
+        [
+          {
+            "node": "Research - Loop Attempts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research - Loop Attempts": {
+      "main": [
+        [
+          {
+            "node": "Research - Combine & Rank",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Research - Search Noon via OpenRouter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research - Search Noon via OpenRouter": {
+      "main": [
+        [
+          {
+            "node": "Research - Validate Saudi Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research - Validate Saudi Results": {
+      "main": [
+        [
+          {
+            "node": "Research - Loop Attempts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research - Combine & Rank": {
+      "main": [
+        [
+          {
+            "node": "Research - Normalize Beauty Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research - Normalize Beauty Products": {
+      "main": [
+        [
+          {
+            "node": "Research - Prepare Tool Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Affiliate_NOON_COMPLETE_V1'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
