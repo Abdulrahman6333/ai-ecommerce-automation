@@ -1,0 +1,427 @@
+{
+  "name": "Lunara - 02 Saudi Market Research",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "fcc28f7b-0ca4-49c6-9876-a05f2f6e967d",
+      "name": "01 - Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "country",
+              "type": "string",
+              "value": "Saudi Arabia"
+            },
+            {
+              "id": "2",
+              "name": "country_code",
+              "type": "string",
+              "value": "SA"
+            },
+            {
+              "id": "3",
+              "name": "currency",
+              "type": "string",
+              "value": "SAR"
+            },
+            {
+              "id": "4",
+              "name": "niche",
+              "type": "string",
+              "value": "Beauty & Personal Care"
+            },
+            {
+              "id": "5",
+              "name": "top_n",
+              "type": "number",
+              "value": 3
+            },
+            {
+              "id": "6",
+              "name": "ai_model",
+              "type": "string",
+              "value": "openai/gpt-4.1-mini"
+            },
+            {
+              "id": "7",
+              "name": "max_web_results",
+              "type": "number",
+              "value": 5
+            },
+            {
+              "id": "8",
+              "name": "workflow_version",
+              "type": "string",
+              "value": "1.0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ca54db6a-442e-4c92-be81-619e3d64c8d5",
+      "name": "00 - Research Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"products\": [\n    {\n      \"product_name\": \"Rose Quartz Facial Roller & Gua Sha Set\",\n      \"brand\": \"Lunara Demo\",\n      \"category\": \"Beauty & Personal Care - Skincare Tools\",\n      \"supplier_price\": 18,\n      \"selling_price\": 59,\n      \"currency\": \"SAR\",\n      \"product_url\": \"https://example.com/demo/rose-quartz-roller\",\n      \"image_url\": \"https://example.com/demo/images/rose-quartz-roller.jpg\",\n      \"description\": \"Dual-ended rose quartz facial roller and gua sha stone for at-home facial massage, lymphatic drainage, and skincare routines.\",\n      \"available_stock\": 500,\n      \"source\": \"DEMO\"\n    },\n    {\n      \"product_name\": \"Vitamin C Brightening Serum 30ml\",\n      \"brand\": \"Lunara Demo\",\n      \"category\": \"Beauty & Personal Care - Skincare\",\n      \"supplier_price\": 22,\n      \"selling_price\": 79,\n      \"currency\": \"SAR\",\n      \"product_url\": \"https://example.com/demo/vitamin-c-serum\",\n      \"image_url\": \"https://example.com/demo/images/vitamin-c-serum.jpg\",\n      \"description\": \"Brightening vitamin C serum formulated to reduce dark spots and even skin tone, suitable for daily use.\",\n      \"available_stock\": 350,\n      \"source\": \"DEMO\"\n    },\n    {\n      \"product_name\": \"Silk Wrapped Hair Turban Towel\",\n      \"brand\": \"Lunara Demo\",\n      \"category\": \"Beauty & Personal Care - Hair Care\",\n      \"supplier_price\": 15,\n      \"selling_price\": 45,\n      \"currency\": \"SAR\",\n      \"product_url\": \"https://example.com/demo/silk-hair-turban\",\n      \"image_url\": \"https://example.com/demo/images/silk-hair-turban.jpg\",\n      \"description\": \"Quick-dry silk-wrapped hair turban towel designed to reduce frizz and protect hair after washing.\",\n      \"available_stock\": 620,\n      \"source\": \"DEMO\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "a105e7ec-ff4f-42e6-b45f-64ada6eb5f64",
+      "name": "02 - Research Product Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "products",
+        "options": {
+          "destinationFieldName": "product"
+        }
+      },
+      "id": "ed1d365b-ace7-4f17-b050-7e898c948832",
+      "name": "03 - Split Products",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        608,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const p = $json.product;\nconst config = $('00 - Research Config').first().json;\n\nconst today = new Date().toISOString().slice(0, 10);\n\nconst promptTemplate = \"You are a market research analyst with live web search access.\\n\\n\" +\n\"Research the following product SPECIFICALLY for this market context:\\n\" +\n\"Country: \" + config.country + \"\\n\" +\n\"Niche: \" + config.niche + \"\\n\" +\n\"Platforms to evaluate: TikTok, Snapchat, Instagram\\n\" +\n\"Today's date (use this exact value for research_date): \" + today + \"\\n\\n\" +\n\"Product details (DEMO placeholder product, source = \" + p.source + \"):\\n\" +\n\"- Name: \" + p.product_name + \"\\n\" +\n\"- Brand: \" + p.brand + \"\\n\" +\n\"- Category: \" + p.category + \"\\n\" +\n\"- Description: \" + p.description + \"\\n\" +\n\"- Listed selling price: \" + p.selling_price + \" \" + p.currency + \"\\n\\n\" +\n\"Use your live web search tool to investigate this product for the Saudi market. Cover:\\n\" +\n\"1. Saudi product availability / presence\\n\" +\n\"2. Competing or similar products\\n\" +\n\"3. Verified price examples in SAR, each linked to a real source\\n\" +\n\"4. Number and quality of useful evidence sources\\n\" +\n\"5. Demand signals (distinct from mere competitor presence)\\n\" +\n\"6. Competition intensity\\n\" +\n\"7. Market saturation risk\\n\" +\n\"8. Suitability for TikTok\\n\" +\n\"9. Suitability for Snapchat\\n\" +\n\"10. Suitability for Instagram\\n\" +\n\"11. Potential selling angles supported by evidence\\n\" +\n\"12. Risks or reasons NOT to sell the product\\n\\n\" +\n\"SOURCE CLASSIFICATION - for EVERY evidence source you cite, classify it:\\n\" +\n\"- country_relevance: one of SAUDI, GCC, GLOBAL, OTHER\\n\" +\n\"- source_type: one of marketplace, retailer, social_commerce, brand, search_result, article, other\\n\" +\n\"- verified_saudi_source: true only if the source is genuinely and specifically about the Saudi market (e.g. a .sa domain, a Saudi retailer page, explicit Saudi Arabia content). A source merely mentioning Saudi Arabia in passing, or a US/global page, is NOT verified_saudi_source.\\n\" +\n\"- Global or US sources (e.g. TikTok Shop US) may be cited for general context but must be classified as GLOBAL/OTHER, never SAUDI, and must never be used to justify Saudi-specific conclusions.\\n\\n\" +\n\"CRITICAL: SEPARATE MARKET PRESENCE FROM DEMAND\\n\" +\n\"- market_presence_score (0-10): based on how many Saudi retailers/marketplaces carry comparable products and how many identifiable Saudi competitors exist. This measures presence/competition, NOT popularity.\\n\" +\n\"- demand_evidence_score (0-10): requires STRONGER signals such as Saudi-specific review volume, Saudi bestseller/ranking evidence, Saudi search or trend evidence, or repeated Saudi retailer popularity indicators. The mere existence of competitors is NOT demand evidence.\\n\" +\n\"- If you find market presence but no strong demand evidence, market_presence_score may be positive while demand_evidence_score must stay 0 (meaning 'no evidence found', not 'zero demand'). NEVER infer high demand simply because competitors exist.\\n\\n\" +\n\"PRICE VALIDATION\\n\" +\n\"- Only report a price in observed_prices if you found it directly in a real source, the currency is confirmable as SAR (or clearly convertible), and the product is reasonably comparable.\\n\" +\n\"- Each entry: { \\\"price_sar\\\": <number>, \\\"source_url\\\": \\\"<url you found it at>\\\", \\\"verified\\\": true|false }. Set verified=false if you are not fully confident in the match; verified=true only for a clean, directly comparable, clearly-priced match.\\n\" +\n\"- Do NOT compute or output a summary min/max price yourself - just list the individual observed_prices entries.\\n\\n\" +\n\"CLAIM SAFETY - do NOT use phrases like \\\"current trends\\\", \\\"high demand\\\", \\\"popular in Saudi\\\", \\\"saturated market\\\", or \\\"strong TikTok potential\\\" unless your cited evidence actually supports that specific statement. If evidence is weak or missing, explicitly write \\\"insufficient evidence\\\" or \\\"uncertain\\\" instead of a confident claim.\\n\\n\" +\n\"EVIDENCE RULES\\n\" +\n\"- Never fabricate demand, sales volumes, reviews, ratings, prices, customer numbers, market share, trends, competitors, or social media popularity.\\n\" +\n\"- If evidence cannot be found for a field, use \\\"UNKNOWN\\\" (or an empty array/0, as appropriate for that field's type) rather than guessing.\\n\" +\n\"- Clearly separate assumptions from verified evidence in your summary.\\n\" +\n\"- Never interpret search-result count alone as proof of demand.\\n\" +\n\"- Prefer Saudi-specific evidence over generic or non-Saudi evidence, and be honest when you only found non-Saudi evidence.\\n\" +\n\"- Use up to \" + config.max_web_results + \" of the most relevant sources.\\n\\n\" +\n\"CONFIDENCE\\n\" +\n\"- research_confidence_score (0-100) must reflect the STRENGTH of evidence: weight Saudi-specific sources, source diversity, direct product/competitor evidence, price verification, and consistency across sources. Finding five URLs alone does NOT justify high confidence.\\n\\n\" +\n\"Respond with STRICT JSON only, no markdown fences, no leading or trailing text, matching exactly this schema:\\n\" +\n\"{\\n\" +\n\"  \\\"product_name\\\": \\\"\\\",\\n\" +\n\"  \\\"research_date\\\": \\\"\\\",\\n\" +\n\"  \\\"saudi_presence\\\": \\\"HIGH|MEDIUM|LOW|UNKNOWN\\\",\\n\" +\n\"  \\\"market_presence_score\\\": 0,\\n\" +\n\"  \\\"demand_evidence_score\\\": 0,\\n\" +\n\"  \\\"competition_score\\\": 0,\\n\" +\n\"  \\\"saturation_risk_score\\\": 0,\\n\" +\n\"  \\\"tiktok_fit_score\\\": 0,\\n\" +\n\"  \\\"snapchat_fit_score\\\": 0,\\n\" +\n\"  \\\"instagram_fit_score\\\": 0,\\n\" +\n\"  \\\"recommended_platform\\\": \\\"\\\",\\n\" +\n\"  \\\"observed_prices\\\": [ { \\\"price_sar\\\": 0, \\\"source_url\\\": \\\"\\\", \\\"verified\\\": true } ],\\n\" +\n\"  \\\"competitor_examples\\\": [],\\n\" +\n\"  \\\"selling_angles\\\": [],\\n\" +\n\"  \\\"risks\\\": [],\\n\" +\n\"  \\\"evidence_sources\\\": [ { \\\"title\\\": \\\"\\\", \\\"url\\\": \\\"\\\", \\\"supports\\\": \\\"\\\", \\\"country_relevance\\\": \\\"SAUDI|GCC|GLOBAL|OTHER\\\", \\\"source_type\\\": \\\"marketplace|retailer|social_commerce|brand|search_result|article|other\\\", \\\"verified_saudi_source\\\": true }],\\n\" +\n\"  \\\"research_confidence_score\\\": 0,\\n\" +\n\"  \\\"summary\\\": \\\"\\\"\\n\" +\n\"}\\n\\n\" +\n\"All scores are 0-10 except research_confidence_score which is 0-100.\";\n\nreturn {\n  json: Object.assign({}, p, { research_prompt: promptTemplate })\n};"
+      },
+      "id": "f3eb21dc-e111-4fb4-ade2-fb39a391a0ad",
+      "name": "04 - Build Saudi Research Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $('00 - Research Config').first().json.ai_model, messages: [ { role: \"user\", content: $json.research_prompt } ], tools: [ { type: \"openrouter:web_search\", max_total_results: $('00 - Research Config').first().json.max_web_results, search_context_size: \"medium\" } ], response_format: { type: \"json_object\" }, temperature: 0.2 } }}",
+        "options": {}
+      },
+      "id": "5dcc9035-0faf-460a-869b-79a574aa5008",
+      "name": "05 - OpenRouter Live Web Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const original = $('04 - Build Saudi Research Prompt').item.json;\nconst httpResponse = $json;\n\nlet aiText = '';\ntry {\n  aiText = (httpResponse.choices && httpResponse.choices[0] && httpResponse.choices[0].message && httpResponse.choices[0].message.content) || '';\n} catch (e) {\n  aiText = '';\n}\n\nfunction tryParse(text) {\n  try {\n    return JSON.parse(text);\n  } catch (e) {\n    return null;\n  }\n}\n\nlet cleaned = (aiText || '').trim();\nlet parsed = tryParse(cleaned);\n\nif (!parsed) {\n  let fenceStripped = cleaned;\n  if (fenceStripped.indexOf('```') !== -1) {\n    fenceStripped = fenceStripped.replace(/```(json)?/gi, '').trim();\n  }\n  parsed = tryParse(fenceStripped);\n  if (parsed) cleaned = fenceStripped;\n}\n\nif (!parsed) {\n  const firstBrace = cleaned.indexOf('{');\n  const lastBrace = cleaned.lastIndexOf('}');\n  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {\n    const candidate = cleaned.substring(firstBrace, lastBrace + 1);\n    parsed = tryParse(candidate);\n  }\n}\n\nif (!parsed || typeof parsed !== 'object') {\n  return {\n    json: {\n      product_name: original.product_name,\n      brand: original.brand,\n      category: original.category,\n      selling_price: original.selling_price,\n      currency: original.currency,\n      product_url: original.product_url,\n      source: original.source,\n      research_parse_error: true,\n      research_status: 'FAILED',\n      raw_ai_text: aiText\n    }\n  };\n}\n\nreturn {\n  json: Object.assign({}, original, parsed, {\n    research_parse_error: false,\n    research_status: 'VALID'\n  })\n};"
+      },
+      "id": "a002a720-828c-4224-a215-4e7cfe7f6d6f",
+      "name": "06 - Extract Research Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $json;\n\nif (item.research_parse_error === true || item.research_status === 'FAILED') {\n  return {\n    json: Object.assign({}, item, {\n      verified_source_count: 0,\n      saudi_source_count: 0,\n      gcc_source_count: 0,\n      global_source_count: 0,\n      verified_price_count: 0,\n      evidence_quality_score: 0,\n      evidence_warning: ['PARSE_FAILED']\n    })\n  };\n}\n\nconst sources = Array.isArray(item.evidence_sources) ? item.evidence_sources : [];\n\nfunction hasUrl(s) {\n  return s && typeof s.url === 'string' && s.url.trim().length > 0;\n}\n\nconst verifiedSourceCount = sources.filter(hasUrl).length;\n\nconst saudiSources = sources.filter(function(s) {\n  return hasUrl(s) && s.country_relevance === 'SAUDI' && s.verified_saudi_source === true;\n});\nconst gccSources = sources.filter(function(s) {\n  return hasUrl(s) && s.country_relevance === 'GCC';\n});\nconst globalSources = sources.filter(function(s) {\n  return hasUrl(s) && (s.country_relevance === 'GLOBAL' || s.country_relevance === 'OTHER');\n});\n\nconst saudiSourceCount = saudiSources.length;\nconst gccSourceCount = gccSources.length;\nconst globalSourceCount = globalSources.length;\n\nconst observedPrices = Array.isArray(item.observed_prices) ? item.observed_prices : [];\nconst verifiedPrices = observedPrices.filter(function(p) {\n  return p && p.verified === true && typeof p.price_sar === 'number' && p.price_sar > 0 && typeof p.source_url === 'string' && p.source_url.trim().length > 0;\n});\nconst verifiedPriceCount = verifiedPrices.length;\n\nconst observedPriceRangeSar = verifiedPriceCount > 0 ? {\n  min: Math.min.apply(null, verifiedPrices.map(function(p) { return p.price_sar; })),\n  max: Math.max.apply(null, verifiedPrices.map(function(p) { return p.price_sar; }))\n} : { min: null, max: null };\n\nconst warnings = [];\n\nif (verifiedSourceCount === 0) {\n  warnings.push('NO_SOURCES');\n}\nif (saudiSourceCount === 0) {\n  warnings.push('NO_VERIFIED_SAUDI_SOURCES');\n}\nif (verifiedPriceCount === 0) {\n  warnings.push('NO_VERIFIED_PRICES');\n}\n\nconst marketPresence = Number(item.market_presence_score) || 0;\nconst demandEvidence = Number(item.demand_evidence_score) || 0;\n\nif (marketPresence > 0 && demandEvidence === 0) {\n  warnings.push('PRESENCE_WITHOUT_DEMAND_EVIDENCE');\n}\nif (demandEvidence >= 6 && saudiSourceCount === 0) {\n  warnings.push('DEMAND_CLAIM_WITHOUT_SAUDI_SOURCE');\n}\n\nconst confidence = Number(item.research_confidence_score) || 0;\nif (confidence >= 50 && verifiedSourceCount === 0) {\n  warnings.push('CONFIDENCE_NOT_SUPPORTED_BY_SOURCES');\n}\n\nfunction clamp(n, min, max) {\n  const num = Number(n) || 0;\n  return Math.min(max, Math.max(min, num));\n}\n\nconst sourceTypeDiversity = new Set(sources.filter(hasUrl).map(function(s) { return s.source_type; })).size;\n\nlet evidenceQualityScore =\n  clamp(saudiSourceCount * 2, 0, 6) +\n  clamp(sourceTypeDiversity, 0, 2) +\n  clamp(verifiedPriceCount, 0, 2);\nevidenceQualityScore = clamp(evidenceQualityScore - warnings.length, 0, 10);\n\nreturn {\n  json: Object.assign({}, item, {\n    verified_source_count: verifiedSourceCount,\n    saudi_source_count: saudiSourceCount,\n    gcc_source_count: gccSourceCount,\n    global_source_count: globalSourceCount,\n    verified_price_count: verifiedPriceCount,\n    observed_price_range_sar: observedPriceRangeSar,\n    evidence_quality_score: evidenceQualityScore,\n    evidence_warning: warnings\n  })\n};"
+      },
+      "id": "750e6905-43f3-4e56-9aa5-dd33a866c27b",
+      "name": "07 - Evidence Validation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $json;\n\nif (item.research_parse_error === true || item.research_status === 'FAILED') {\n  return {\n    json: Object.assign({}, item, {\n      research_status: 'FAILED',\n      saudi_market_score: null\n    })\n  };\n}\n\nfunction clamp(n, min, max) {\n  const num = Number(n) || 0;\n  return Math.min(max, Math.max(min, num));\n}\n\nconst verifiedSourceCount = Number(item.verified_source_count) || 0;\n\nif (verifiedSourceCount === 0) {\n  return {\n    json: Object.assign({}, item, {\n      research_status: 'INSUFFICIENT_EVIDENCE',\n      saudi_market_score: null\n    })\n  };\n}\n\nconst demandEvidence = clamp(item.demand_evidence_score, 0, 10);\nconst tiktok = clamp(item.tiktok_fit_score, 0, 10);\nconst snapchat = clamp(item.snapchat_fit_score, 0, 10);\nconst instagram = clamp(item.instagram_fit_score, 0, 10);\nconst platformFit = (tiktok + snapchat + instagram) / 3;\n\nconst competition = clamp(item.competition_score, 0, 10);\nconst competitionOpportunity = 10 - competition;\n\nconst saturation = clamp(item.saturation_risk_score, 0, 10);\nconst lowSaturationOpportunity = 10 - saturation;\n\nconst evidenceQuality = clamp(item.evidence_quality_score, 0, 10);\n\nconst researchConfidence = clamp((Number(item.research_confidence_score) || 0) / 10, 0, 10);\n\nconst weights = {\n  demandEvidence: 0.30,\n  platformFit: 0.20,\n  competitionOpportunity: 0.15,\n  lowSaturationOpportunity: 0.10,\n  evidenceQuality: 0.15,\n  researchConfidence: 0.10\n};\n\nconst rawScore =\n  (weights.demandEvidence * demandEvidence) +\n  (weights.platformFit * platformFit) +\n  (weights.competitionOpportunity * competitionOpportunity) +\n  (weights.lowSaturationOpportunity * lowSaturationOpportunity) +\n  (weights.evidenceQuality * evidenceQuality) +\n  (weights.researchConfidence * researchConfidence);\n\nconst saudiMarketScore = clamp(rawScore * 10, 0, 100);\n\nreturn {\n  json: Object.assign({}, item, {\n    saudi_market_score: Number(saudiMarketScore.toFixed(2)),\n    research_status: 'VALID',\n    saudi_market_score_breakdown: {\n      demand_evidence: demandEvidence,\n      market_presence_score: clamp(item.market_presence_score, 0, 10),\n      platform_fit: Number(platformFit.toFixed(2)),\n      competition_opportunity: competitionOpportunity,\n      low_saturation_opportunity: lowSaturationOpportunity,\n      evidence_quality: evidenceQuality,\n      research_confidence: Number(researchConfidence.toFixed(2)),\n      weights: weights\n    }\n  })\n};"
+      },
+      "id": "7914b7f1-3a76-4422-aafa-1e1fc5d0770b",
+      "name": "08 - Saudi Market Scoring",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "saudi_market_score",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "469c572f-d2e3-411d-8c39-783be7ad05e6",
+      "name": "09 - Rank Research Results",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('00 - Research Config').first().json;\nconst topN = Number(config.top_n) || 3;\n\nconst allItems = $input.all().map(function(i) { return i.json; });\n\nconst validItems = allItems.filter(function(item) { return item.research_status === 'VALID'; });\nconst failedItems = allItems.filter(function(item) { return item.research_status !== 'VALID'; });\n\nconst sortedValid = validItems.slice().sort(function(a, b) {\n  return (Number(b.saudi_market_score) || 0) - (Number(a.saudi_market_score) || 0);\n});\n\nconst top = sortedValid.slice(0, topN).map(function(item, index) {\n  return {\n    rank: index + 1,\n    product_name: item.product_name,\n    research_status: item.research_status,\n    saudi_market_score: item.saudi_market_score,\n    market_presence_score: item.market_presence_score,\n    demand_evidence_score: item.demand_evidence_score,\n    competition_score: item.competition_score,\n    saturation_risk_score: item.saturation_risk_score,\n    recommended_platform: item.recommended_platform,\n    tiktok_fit_score: item.tiktok_fit_score,\n    snapchat_fit_score: item.snapchat_fit_score,\n    instagram_fit_score: item.instagram_fit_score,\n    observed_price_range_sar: item.observed_price_range_sar,\n    verified_price_count: item.verified_price_count,\n    selling_angles: item.selling_angles,\n    risks: item.risks,\n    verified_source_count: item.verified_source_count,\n    saudi_source_count: item.saudi_source_count,\n    gcc_source_count: item.gcc_source_count,\n    global_source_count: item.global_source_count,\n    research_confidence_score: item.research_confidence_score,\n    evidence_sources: item.evidence_sources,\n    evidence_warning: item.evidence_warning,\n    research_parse_error: item.research_parse_error || false,\n    summary: item.summary\n  };\n});\n\nconst summaryItem = {\n  is_summary: true,\n  valid_product_count: validItems.length,\n  failed_product_count: failedItems.length,\n  needs_more_candidates: validItems.length < topN,\n  returned_count: top.length\n};\n\nreturn [{ json: summaryItem }].concat(top.map(function(item) { return { json: item }; }));"
+      },
+      "id": "b02a751d-8e95-49a3-bfba-d600205e5941",
+      "name": "10 - Top 3 Researched Opportunities",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📥 INPUT\nManual trigger, research config, and demo candidate products (Beauty & Personal Care, Saudi Arabia) matching Product Hunter V1 output. Products are split into individual items for research.",
+        "height": 300,
+        "width": 1240,
+        "color": 4
+      },
+      "id": "57440d87-ffa8-4908-8e5a-6e9276d113a6",
+      "name": "INPUT",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🔍 LIVE RESEARCH\nBuilds a strict-evidence research prompt per product and calls OpenRouter with the current web_search server tool (openrouter:web_search) to gather live Saudi market evidence.",
+        "height": 300,
+        "width": 640,
+        "color": 6
+      },
+      "id": "16a01108-454b-42fe-ae72-4977bbe6a680",
+      "name": "LIVE RESEARCH",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🛡️ EVIDENCE\nSafely parses the AI's research JSON, then validates the evidence: counts verified and Saudi-specific sources, flags unsupported claims, and scores evidence quality 0-10.",
+        "height": 300,
+        "width": 640,
+        "color": 5
+      },
+      "id": "138cb3f6-8b3b-488e-a04c-5fcc7b56b2d6",
+      "name": "EVIDENCE",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🧮 SCORING\nComputes a weighted 0-100 saudi_market_score (demand 30%, platform fit 20%, competition opportunity 15%, low saturation 10%, evidence quality 15%, research confidence 10%) and ranks products best-to-worst. No profit margin here — that's Product Hunter's job.",
+        "height": 300,
+        "width": 640,
+        "color": 3
+      },
+      "id": "56a030d4-6ba7-4f44-9a0d-f67145aac9a3",
+      "name": "SCORING",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🏆 OUTPUT\nReturns the Top N (default 3) researched opportunities with scores, evidence source counts, and evidence-backed selling angles and risks.",
+        "height": 300,
+        "width": 340,
+        "color": 7
+      },
+      "id": "e1f8a225-d4c4-47cb-8d73-651963fc9811",
+      "name": "OUTPUT",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        -64
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "01 - Manual Test Trigger": {
+      "main": [
+        [
+          {
+            "node": "00 - Research Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 - Research Config": {
+      "main": [
+        [
+          {
+            "node": "02 - Research Product Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Research Product Input": {
+      "main": [
+        [
+          {
+            "node": "03 - Split Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Split Products": {
+      "main": [
+        [
+          {
+            "node": "04 - Build Saudi Research Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Build Saudi Research Prompt": {
+      "main": [
+        [
+          {
+            "node": "05 - OpenRouter Live Web Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 - OpenRouter Live Web Research": {
+      "main": [
+        [
+          {
+            "node": "06 - Extract Research Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 - Extract Research Response": {
+      "main": [
+        [
+          {
+            "node": "07 - Evidence Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 - Evidence Validation": {
+      "main": [
+        [
+          {
+            "node": "08 - Saudi Market Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "08 - Saudi Market Scoring": {
+      "main": [
+        [
+          {
+            "node": "09 - Rank Research Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "09 - Rank Research Results": {
+      "main": [
+        [
+          {
+            "node": "10 - Top 3 Researched Opportunities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
